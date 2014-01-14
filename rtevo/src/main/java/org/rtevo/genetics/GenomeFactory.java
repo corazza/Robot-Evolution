@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.rtevo.genome;
+package org.rtevo.genetics;
 
 import java.util.ArrayList;
 
@@ -12,12 +12,12 @@ import org.rtevo.util.RandomUtil;
  * 
  */
 public class GenomeFactory {
-    public static Genome random() {
-        Genome genome = new Genome();
+    public static Chromosome random() {
+        Chromosome chromosome = new Chromosome();
 
         // construct legs
-        genome.legs = new ArrayList<Leg>();
-        int numLegs = RandomUtil.random(Genome.minNumLegs, Genome.maxNumLegs);
+        chromosome.legs = new ArrayList<Leg>();
+        int numLegs = RandomUtil.random(Chromosome.minNumLegs, Chromosome.maxNumLegs);
 
         for (int i = 0; i < numLegs; ++i) {
             Leg leg = new Leg();
@@ -32,22 +32,22 @@ public class GenomeFactory {
                 leg.joints.add(joint);
             }
 
-            genome.legs.add(leg);
+            chromosome.legs.add(leg);
         }
 
         // construct body
-        genome.body = new Body();
-        genome.body.width = RandomUtil.random(Body.minWidth, Body.maxWidth);
-        genome.body.height = RandomUtil.random(Body.minHeight, Body.maxHeight);
+        chromosome.body = new Body();
+        chromosome.body.width = RandomUtil.random(Body.minWidth, Body.maxWidth);
+        chromosome.body.height = RandomUtil.random(Body.minHeight, Body.maxHeight);
 
-        return genome;
+        return chromosome;
     }
 
-    public static Genome copy(Genome genome) {
+    public static Chromosome copy(Chromosome chromosome) {
         return random();
     }
 
-    public static Genome crossOver(Genome first, Genome second) {
+    public static Chromosome crossOver(Chromosome first, Chromosome second) {
         return random();
     }
 }

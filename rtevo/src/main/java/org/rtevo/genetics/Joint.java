@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.rtevo.genome;
+package org.rtevo.genetics;
 
 /**
  * @author Jan Corazza

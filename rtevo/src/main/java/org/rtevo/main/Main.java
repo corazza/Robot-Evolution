@@ -25,7 +25,7 @@ public class Main {
      */
     public static void main(String[] args) throws IOException {
         Configuration config = new Configuration();
-        Application app = new Application(config);
+        RobotEvolution app = new RobotEvolution(config);
         app.start();
     }
 
