@@ -35,6 +35,8 @@ public class RobotEvolution {
     // TODO think about threads - do they actually pay of in the way we're
     // implementing them?
 
+    // TODO thread priorities
+
     public void start() {
         // IF GUI ENABLED:
         // 1. Create initial population.
