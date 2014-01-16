@@ -7,7 +7,6 @@ package org.rtevo.genetics;
  * @author Jan Corazza
  * 
  */
-//TODO convert to polygon
 public class Joint {
     public static double minWidth = 0.01;
     public static double maxWidth = 0.2;

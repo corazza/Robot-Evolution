@@ -16,8 +16,8 @@ import org.rtevo.common.Configuration;
  * 
  */
 public class Main {
-    // TODO two optimizations: use threads for separating simulations into units
-    // and then group each simulation in a thread together under a single engine
+    // MEMO two optimizations: use threads for separating simulations into units
+    // and then group each simulation in a thread together under a single engine - engine ???
 
     /**
      * @param args

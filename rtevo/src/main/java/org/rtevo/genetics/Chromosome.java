@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author Jan Corazza
  */
 public class Chromosome {
-    // TODO set in config
+    // MEMO set in config
     public static int minNumLegs = 1;
     public static int maxNumLegs = 20;
 

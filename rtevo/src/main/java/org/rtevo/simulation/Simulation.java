@@ -38,7 +38,27 @@ public class Simulation implements Callable<ArrayList<Result>> {
         this.timeStep = timeStep;
     }
 
-    // FIXME the current implementation is not optimal because if the user wants
+    /**
+     * Creates several simulations out of an array of simulations.
+     * 
+     * @param allChromosomes
+     *            array of chromosomes to be spread across several simulations
+     * @param chromosomesPerSimulation
+     *            how many chromosomes should be included in one simulation,
+     *            last simulation will have allChromosomes.size() %
+     *            chromosomesPerSimulation chromosomes less
+     * @param timeStep
+     * @return
+     */
+    public static ArrayList<Simulation> getSimulations(
+            ArrayList<Chromosome> allChromosomes, int chromosomesPerSimulation,
+            int timeStep) {
+
+        return null;
+    }
+
+    // MEMO - FOR THREADS - the current implementation is not optimal because if
+    // the user wants
     // to render it he has to simulate it in his own thread himself because of
     // data sharing. Solution: Monitor object that has synchronized methods for
     // reading and writing what has to be rendered - PROBLEM: the r/w is
@@ -59,16 +79,15 @@ public class Simulation implements Callable<ArrayList<Result>> {
      * @param timeStep
      *            the number of milliseconds to advance the simulation
      */
-    // TODO check if this is compatible with JBox2D (the approach of using +int
+    // MEMO check if this is compatible with JBox2D (the approach of using +int
     // milliseconds to advance the simulation)
     public void update(/* timeStep is known to the object */) {
-        // TODO actually simulate
-        box2d.update(timeStep);
-        
-        //search for failed, remove from chromosomes
-        
-        //add failed to results
-        
+        // MEMO actually simulate
+
+        // search for failed, remove from chromosomes
+
+        // add failed to results
+
     }
 
     /**
