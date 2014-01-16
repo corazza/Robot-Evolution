@@ -15,6 +15,10 @@ public class Chromosome {
     public static int minNumLegs = 1;
     public static int maxNumLegs = 20;
 
-    public ArrayList<Leg> legs;
-    public Body body;
+    // public Body body;
+    // public ArrayList<Leg> legs;
+
+    public ArrayList<Shape> shapes;
+    public ArrayList<Joint> joints;
+
 }

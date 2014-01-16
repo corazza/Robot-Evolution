@@ -11,7 +11,7 @@ import org.rtevo.util.RandomUtil;
  * @author Jan Corazza
  * 
  */
-public class GenomeFactory {
+public class ChromsomeFactory {
     public static Chromosome random() {
         Chromosome chromosome = new Chromosome();
 
@@ -43,7 +43,8 @@ public class GenomeFactory {
         return chromosome;
     }
 
-    public static Chromosome copy(Chromosome chromosome) {
+    public static Chromosome mutate(Chromosome chromosome) {
+        //TODO vrati slican Chromosome
         return random();
     }
 

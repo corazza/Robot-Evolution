@@ -38,11 +38,15 @@ public class RobotEvolution {
     // TODO thread priorities
 
     public void start() {
+        //no threads:
+        
+        
+        //threads:
         // IF GUI ENABLED:
-        // 1. Create initial population.
-        // 2. Divide that population to parallelSimulation simulations.
-        // 3. submit() (parallelSimulation-1) simulations to workerPool.
-        // 4. Keep the remaining simulation in an update-render loop. If it is
+        // 1. Create initial population. GeneticFactory
+        // 2. Divide that population to parallelSimulation simulations. - POSSIBILITY
+        // 3. submit() (parallelSimulation-1) simulations to workerPool. - NEBITNO
+        // 4. Keep the remaining simulation in an update-render loop. If it is - NEBITNO
         // done display an overlay "waiting for other threads" or pause
         // rendering - POSSIBLE: call get() on all Futures that you kept from
         // submit() calls, this will pause the current thread without wasting
