@@ -51,7 +51,7 @@ public class Simulation implements Callable<ArrayList<Result>> {
      * @return
      */
     public static ArrayList<Simulation> getSimulations(
-            ArrayList<Chromosome> allChromosomes, int chromosomesPerSimulation,
+            ArrayList<Chromosome> allChromosomes, int numSimulations,
             int timeStep) {
 
         return null;

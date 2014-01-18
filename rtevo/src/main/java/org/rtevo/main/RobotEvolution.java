@@ -35,8 +35,8 @@ public class RobotEvolution {
     private Configuration configuration;
     private ExecutorService workerPool;
 
-    // how many robots will one simulation evaluate (at the same time)?
-    private int chromosomesPerSimulation = 10;
+    // how many simulations will be created for one generation?
+    private int numSimulations = 10;
     private int timeStep = 10; // in milliseconds
 
     public RobotEvolution(Configuration config) {
@@ -63,12 +63,13 @@ public class RobotEvolution {
             ArrayList<Result> results = new ArrayList<Result>();
 
             ArrayList<Simulation> simulations = Simulation.getSimulations(
-                    newPopulation, chromosomesPerSimulation, timeStep);
+                    newPopulation, numSimulations, timeStep);
 
             for (Simulation simulation : simulations) {
                 results.addAll(simulation.simulate());
             }
 
+            newPopulation = ChromosomeFactory.evolve(results);
             // TODO newPopulation =
             // GeneticFactory.getNextPopulationFromResults()
         }

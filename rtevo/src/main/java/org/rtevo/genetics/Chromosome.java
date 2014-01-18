@@ -20,5 +20,5 @@ public class Chromosome {
 
     public ArrayList<Shape> shapes;
     public ArrayList<Joint> joints;
-
+    
 }
