@@ -70,8 +70,6 @@ public class RobotEvolution {
 			}
 
             newPopulation = ChromosomeFactory.evolve(results);
-            // TODO newPopulation =
-            // GeneticFactory.getNextPopulationFromResults()
         }
 
 		// threads:
