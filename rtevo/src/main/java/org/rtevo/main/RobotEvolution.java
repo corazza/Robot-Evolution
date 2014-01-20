@@ -4,13 +4,12 @@
 package org.rtevo.main;
 
 import java.util.List;
-//import java.util.concurrent.ExecutorService;
-//import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.rtevo.common.Configuration;
+import org.rtevo.gui.Renderer;
 import org.rtevo.simulation.Generation;
 import org.rtevo.simulation.Result;
 import org.rtevo.simulation.Simulation;
@@ -34,89 +33,80 @@ import org.rtevo.simulation.Simulation;
  * 
  */
 public class RobotEvolution {
-    private Configuration configuration;
-    // private ExecutorService workerPool;
+	private Configuration configuration;
+	private ExecutorService workerPool;
 
-    // how many simulations will be created for one generation?
-    private int numSimulations = 10;
-    private int timeStep = 10; // in milliseconds
+	// how many simulations will be created for one generation?
+	private int numSimulations = 10;
+	private int timeStep = 10; // in milliseconds
 
-    public RobotEvolution(Configuration config) {
-        this.configuration = config;
+	public RobotEvolution(Configuration config) {
+		this.configuration = config;
 
-        // workerPool = Executors.newCachedThreadPool();
-    }
+		workerPool = Executors.newCachedThreadPool();
+	}
 
-    // MEMO think about threads - do they actually pay of in the way we're
-    // implementing them?
+	// MEMO think about threads - do they actually pay of in the way we're
+	// implementing them?
 
-    // MEMO thread priorities
+	// MEMO thread priorities
 
-    public void start() {
-        // Initialize graphics:
-        try {
-            Display.setDisplayMode(new DisplayMode(800, 600));
-            Display.setTitle("Robot Evolution");
-            Display.create();
-        } catch (LWJGLException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
-        
-        while(!Display.isCloseRequested()) {
-            Display.update();
-            Display.sync(10);
-        }
-        
-        //TODO thread for calc?
+	public void start() {
+		// TODO thread for calc?
 
-        // Initialize GA:
-        Generation generation = new Generation(
-                configuration.getRobotsPerGeneration());
+		// Start GUI:
+		Renderer renderer = new Renderer();
 
-        // Start the application:
-        for (int i = 0; i < configuration.getGenerations(); ++i) {
-            System.out.println("generation #" + i);
-            
-            Display.update();
-            
-            List<Simulation> simulations = generation.getSimulations(
-                    numSimulations, timeStep);
+		// Initialize GA:
+		Generation generation = new Generation(
+				configuration.getRobotsPerGeneration());
 
-            for (Simulation simulation : simulations) {
-                List<Result> results = simulation.simulate();
-                generation.submitResults(results);
-            }
+		// Start the application:
+		for (int i = 0; i < configuration.getGenerations(); ++i) {
+			System.out.println("generation #" + i);
 
-            // evolve
-            generation = generation.nextGeneration();
-        }
+			List<Simulation> simulations = generation.getSimulations(
+					numSimulations, timeStep,
+					configuration.getMillisecondsPerSimulation());
+			
+			renderer.setSimulation(simulations.get(0));
 
-        // Close the window
-        Display.destroy();
+			for (Simulation simulation : simulations) {
+				workerPool.submit(simulation);
+				List<Result> results = simulation.simulate();
+				generation.submitResults(results);
+			}
 
-        System.out.println("Done.");
+			// evolve
+			generation = generation.nextGeneration();
+		}
 
-        // threads:
-        // IF GUI ENABLED:
-        // 1. Create initial population. GeneticFactory
-        // 2. Divide that population to parallelSimulation simulations. -
-        // POSSIBILITY
-        // 3. submit() (parallelSimulation-1) simulations to workerPool. -
-        // NEBITNO
-        // 4. Keep the remaining simulation in an update-render loop. If it is -
-        // NEBITNO
-        // done display an overlay "waiting for other threads" or pause
-        // rendering - POSSIBLE: call get() on all Futures that you kept from
-        // submit() calls, this will pause the current thread without wasting
-        // resources.
-        // 5. In that loop check all simulations if they are finished. If not
-        // GOTO 4, else GOTO 6.
-        // 6. get() all results from Callable simulations, create a new
-        // generation, GOTO 2.
+		// Close the window
+		Display.destroy();
 
-        // IF GUI DISABLED:
-        // all the same, without update-render loop, just call() the Callable
-        // simulation, then get() all other thread's Results from their Future.
-    }
+		System.out.println("Done.");
+
+		// threads:
+		// IF GUI ENABLED:
+		// 1. Create initial population. GeneticFactory
+		// 2. Divide that population to parallelSimulation simulations. -
+		// POSSIBILITY
+		// 3. submit() (parallelSimulation-1) simulations to workerPool. -
+		// NEBITNO
+		// 4. Keep the remaining simulation in an update-render loop. If it is -
+		// NEBITNO
+		// done display an overlay "waiting for other threads" or pause
+		// rendering - POSSIBLE: call get() on all Futures that you kept from
+		// submit() calls, this will pause the current thread without wasting
+		// resources.
+		// 5. In that loop check all simulations if they are finished. If not
+		// GOTO 4, else GOTO 6.
+		// 6. get() all results from Callable simulations, create a new
+		// generation, GOTO 2.
+
+		// IF GUI DISABLED:
+		// all the same, without update-render loop, just call() the Callable
+		// simulation, then get() all other thread's Results from their Future.
+	}
+
 }

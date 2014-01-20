@@ -57,7 +57,8 @@ public class Generation {
      * @param timeStep
      * @return
      */
-    public ArrayList<Simulation> getSimulations(int numSimulations, int timeStep) {
+	public ArrayList<Simulation> getSimulations(int numSimulations,
+			int timeStep, int getMillisecondsPerSimulation) {
         int numChromosomes = chromosomes.size();
 
         if (numSimulations > numChromosomes) {
@@ -72,7 +73,7 @@ public class Generation {
             List<Chromosome> taken = new ArrayList<Chromosome>(chromosomes.subList(i
                     * robotsPerSimulation, i * robotsPerSimulation
                     + robotsPerSimulation));
-            simulations.add(new Simulation(taken, timeStep));
+            simulations.add(new Simulation(taken, timeStep, getMillisecondsPerSimulation));
         }
 
         int robotsLeft = numChromosomes % numSimulations;
