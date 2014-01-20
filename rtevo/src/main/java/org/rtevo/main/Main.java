@@ -17,13 +17,16 @@ import org.rtevo.common.Configuration;
  */
 public class Main {
     // MEMO two optimizations: use threads for separating simulations into units
-    // and then group each simulation in a thread together under a single engine - engine ???
+    // and then group each simulation in a thread together under a single engine
+    // - engine ???
 
     /**
      * @param args
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+        // TODO start GUI configuration
+
         Configuration config = new Configuration();
         RobotEvolution app = new RobotEvolution(config);
         app.start();

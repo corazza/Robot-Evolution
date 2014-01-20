@@ -10,10 +10,16 @@ import org.rtevo.genetics.Chromosome;
  * 
  */
 public class Result implements Comparable<Result> {
-    public double metersPassed;
     public Chromosome chromosome;
+    public double metersPassed;
+    
+    public Result(Chromosome chromosome, double metersPassed) {
+        this.chromosome = chromosome;
+        this.metersPassed = metersPassed;
+    }
 
     public int compareTo(Result other) {
         return (int) (metersPassed - other.metersPassed);
     }
+    
 }

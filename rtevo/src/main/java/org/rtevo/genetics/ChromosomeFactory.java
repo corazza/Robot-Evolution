@@ -5,6 +5,7 @@ package org.rtevo.genetics;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.rtevo.simulation.Result;
 import org.rtevo.util.RandomUtil;
@@ -29,7 +30,7 @@ public class ChromosomeFactory {
         return chromosome;
     }
 
-    public static ArrayList<Chromosome> random(int n) {
+    public static List<Chromosome> random(int n) {
         ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 
         for (int i = 0; i < n; ++i) {
@@ -40,7 +41,7 @@ public class ChromosomeFactory {
         return chromosomes;
     }
 
-    public static ArrayList<Chromosome> evolve(ArrayList<Result> results) {
+    public static List<Chromosome> evolve(List<Result> results) {
         // 1. sort the array based on metersPassed
         // 2. remove the below ChromosomeFactory.cutoff percent
         // 3. select ChromosomeFactory.cutoff percent from the remaining
@@ -50,28 +51,31 @@ public class ChromosomeFactory {
         int originalSize = results.size();
         int remove = (int) (cutoff / 100.0 * originalSize);
 
-        ArrayList<Result> myResults = (ArrayList<Result>) results.clone();
+        List<Result> myResults = new ArrayList<Result>(results);
 
         // best results first
         Collections.sort(myResults);
 
         // remove the worst cutoff percent
         if (originalSize > remove) {
-            myResults = (ArrayList<Result>) myResults.subList(0, originalSize
-                    - remove);
+            myResults = myResults.subList(0, originalSize - remove);
         }
 
-        ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
+        List<Chromosome> chromosomes = new ArrayList<Chromosome>();
 
         for (Result result : myResults) {
             chromosomes.add(result.chromosome);
         }
-
+        
         while (chromosomes.size() != originalSize) {
             int outreach = RandomUtil.random(1, myResults.size());
+            int need = originalSize - chromosomes.size();
+            
+            if (outreach > need) {
+                outreach = need;
+            }
 
-            ArrayList<Result> toAdd = (ArrayList<Result>) myResults.subList(0,
-                    outreach);
+            List<Result> toAdd = myResults.subList(0, outreach);
 
             for (Result result : toAdd) {
                 chromosomes.add(mutate(result.chromosome));

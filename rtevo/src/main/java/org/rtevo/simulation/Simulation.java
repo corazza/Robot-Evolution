@@ -4,21 +4,23 @@
 package org.rtevo.simulation;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.rtevo.genetics.Chromosome;
+import org.rtevo.util.RandomUtil;
 
 /**
  * Evaluates chromosomes. Encapsulates and represents a simulation.
  * 
  * @author Jan Corazza
  */
-public class Simulation implements Callable<ArrayList<Result>> {
+public class Simulation implements Callable<List<Result>> {
     // robots that are all in this same simulation
-    private ArrayList<Chromosome> chromosomes;
+    private List<Chromosome> chromosomes;
 
     // array of results for each chromosome
-    private ArrayList<Result> results;
+    private List<Result> results = new ArrayList<Result>();
 
     // TODO map Body -> Chromosome?
 
@@ -33,28 +35,13 @@ public class Simulation implements Callable<ArrayList<Result>> {
      * @param timeStep
      *            the number of milliseconds that each update lasts
      */
-    public Simulation(ArrayList<Chromosome> chromosomes, int timeStep) {
+    public Simulation(List<Chromosome> chromosomes, int timeStep) {
+        if (chromosomes.isEmpty()) {
+            throw new IllegalArgumentException("There must be more than 0 chromosomes in the simulation.");
+        }
+        
         this.chromosomes = chromosomes;
         this.timeStep = timeStep;
-    }
-
-    /**
-     * Creates several simulations out of an array of simulations.
-     * 
-     * @param allChromosomes
-     *            array of chromosomes to be spread across several simulations
-     * @param chromosomesPerSimulation
-     *            how many chromosomes should be included in one simulation,
-     *            last simulation will have allChromosomes.size() %
-     *            chromosomesPerSimulation chromosomes less
-     * @param timeStep
-     * @return
-     */
-    public static ArrayList<Simulation> getSimulations(
-            ArrayList<Chromosome> allChromosomes, int numSimulations,
-            int timeStep) {
-
-        return null;
     }
 
     // MEMO - FOR THREADS - the current implementation is not optimal because if
@@ -81,34 +68,55 @@ public class Simulation implements Callable<ArrayList<Result>> {
      */
     // MEMO check if this is compatible with JBox2D (the approach of using +int
     // milliseconds to advance the simulation)
-    public void update(/* timeStep is known to the object */) {
+    public synchronized void update(/* timeStep is known to the object */) {
         // MEMO actually simulate
 
         // search for failed, remove from chromosomes
 
         // add failed to results
+                
+      Chromosome finished = chromosomes.remove(0);
+      Result finishedResult = new Result(finished, RandomUtil.random(0, 100));
+      results.add(finishedResult);
     }
 
-    public ArrayList<Result> simulate() {
+    public List<Result> simulate() {
         setup();
-
+        
         while (!chromosomes.isEmpty()) {
             update();
         }
-
+        
         return results;
     }
 
     /**
      * Returns an array of Renderable objects.
      */
-    public void snapshot() {
+    public synchronized void snapshot() {
 
+    }
+
+    public void addChromosome(Chromosome toAdd) {
+        chromosomes.add(toAdd);
     }
 
     @Override
-    public ArrayList<Result> call() {
+    public List<Result> call() {
         return simulate();
     }
 
+    
+    public List<Chromosome> getChromosomes() {
+        return chromosomes;
+    }
+
+    public List<Result> getResults() {
+        return results;
+    }
+
+    public int getTimeStep() {
+        return timeStep;
+    }
+    
 }
