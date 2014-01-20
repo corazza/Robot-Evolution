@@ -13,7 +13,9 @@ import java.util.Properties;
 public class Configuration {
     private int generations;
     private int robotsPerGeneration;
-    private int millisecondsPerSimulation;
+    private int robotMilliseconds;
+    private int parallelSimulations;
+    private int timeStep;
 
     public Configuration() throws IOException {
         applyProperties(getDefaultProperties());
@@ -29,8 +31,13 @@ public class Configuration {
         robotsPerGeneration = Integer.parseInt(p.getProperty(
                 "robotsPerGeneration", "100"));
 
-        millisecondsPerSimulation = Integer.parseInt(p.getProperty(
-                "millisecondsPerSimulation", "120000"));
+        robotMilliseconds = Integer.parseInt(p.getProperty("robotMilliseconds",
+                "120000"));
+
+        parallelSimulations = Integer.parseInt(p.getProperty(
+                "parallelSimulations", "7"));
+
+        timeStep = Integer.parseInt(p.getProperty("timeStep", "10"));
     }
 
     private static Properties getDefaultProperties() throws IOException {
@@ -44,8 +51,9 @@ public class Configuration {
     public String toString() {
         return "Configuration [generations=" + generations
                 + ", robotsPerGeneration=" + robotsPerGeneration
-                + ", millisecondsPerSimulation=" + millisecondsPerSimulation
-                + "]";
+                + ", robotMilliseconds=" + robotMilliseconds
+                + ", parallelSimulations=" + parallelSimulations
+                + ", timeStep=" + timeStep + "]";
     }
 
     public int getGenerations() {
@@ -64,12 +72,28 @@ public class Configuration {
         this.robotsPerGeneration = robotsPerGeneration;
     }
 
-    public int getMillisecondsPerSimulation() {
-        return millisecondsPerSimulation;
+    public int getRobotMilliseconds() {
+        return robotMilliseconds;
     }
 
-    public void setMillisecondsPerSimulation(int millisecondsPerSimulation) {
-        this.millisecondsPerSimulation = millisecondsPerSimulation;
+    public void setRobotMilliseconds(int robotMilliseconds) {
+        this.robotMilliseconds = robotMilliseconds;
+    }
+
+    public int getParallelSimulations() {
+        return parallelSimulations;
+    }
+
+    public void setParallelSimulations(int parallelSimulations) {
+        this.parallelSimulations = parallelSimulations;
+    }
+
+    public int getTimeStep() {
+        return timeStep;
+    }
+
+    public void setTimeStep(int timeStep) {
+        this.timeStep = timeStep;
     }
 
 }
