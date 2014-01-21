@@ -11,21 +11,23 @@ import java.util.Properties;
  * 
  */
 public class Configuration {
-    private int generations;
-    private int robotsPerGeneration;
-    private int robotMilliseconds;
-    private int parallelSimulations;
-    private int timeStep;
+    public int generations;
+    public int robotsPerGeneration;
+    public int robotMilliseconds;
+    public int parallelSimulations;
+    public int windowWidth;
+    public int windowHeight;
+    public float gravity;
 
-    public Configuration() throws IOException {
+    public Configuration() {
         applyProperties(getDefaultProperties());
     }
 
-    public Configuration(Properties p) throws IOException {
+    public Configuration(Properties p) {
         applyProperties(p);
     }
 
-    private void applyProperties(Properties p) throws IOException {
+    private void applyProperties(Properties p) {
         generations = Integer.parseInt(p.getProperty("generations", "1000"));
 
         robotsPerGeneration = Integer.parseInt(p.getProperty(
@@ -37,63 +39,21 @@ public class Configuration {
         parallelSimulations = Integer.parseInt(p.getProperty(
                 "parallelSimulations", "7"));
 
-        timeStep = Integer.parseInt(p.getProperty("timeStep", "10"));
+        windowWidth = Integer.parseInt(p.getProperty("windowWidth", "1024"));
+        windowHeight = Integer.parseInt(p.getProperty("windowHeight", "512"));
+
+        gravity = Float.parseFloat(p.getProperty("gravity", "1"));
     }
 
-    private static Properties getDefaultProperties() throws IOException {
+    private static Properties getDefaultProperties() {
         Properties defaultProperties = new Properties();
-        defaultProperties.load(Configuration.class
-                .getResourceAsStream("/default-configuration.properties"));
+        try {
+            defaultProperties.load(Configuration.class
+                    .getResourceAsStream("/default-configuration.properties"));
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't read default configuration");
+        }
         return defaultProperties;
-    }
-
-    @Override
-    public String toString() {
-        return "Configuration [generations=" + generations
-                + ", robotsPerGeneration=" + robotsPerGeneration
-                + ", robotMilliseconds=" + robotMilliseconds
-                + ", parallelSimulations=" + parallelSimulations
-                + ", timeStep=" + timeStep + "]";
-    }
-
-    public int getGenerations() {
-        return generations;
-    }
-
-    public void setGenerations(int generations) {
-        this.generations = generations;
-    }
-
-    public int getRobotsPerGeneration() {
-        return robotsPerGeneration;
-    }
-
-    public void setRobotsPerGeneration(int robotsPerGeneration) {
-        this.robotsPerGeneration = robotsPerGeneration;
-    }
-
-    public int getRobotMilliseconds() {
-        return robotMilliseconds;
-    }
-
-    public void setRobotMilliseconds(int robotMilliseconds) {
-        this.robotMilliseconds = robotMilliseconds;
-    }
-
-    public int getParallelSimulations() {
-        return parallelSimulations;
-    }
-
-    public void setParallelSimulations(int parallelSimulations) {
-        this.parallelSimulations = parallelSimulations;
-    }
-
-    public int getTimeStep() {
-        return timeStep;
-    }
-
-    public void setTimeStep(int timeStep) {
-        this.timeStep = timeStep;
     }
 
 }

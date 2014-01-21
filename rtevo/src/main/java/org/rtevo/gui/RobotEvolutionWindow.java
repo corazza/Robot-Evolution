@@ -1,105 +1,102 @@
 package org.rtevo.gui;
 
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.Color;
-import org.lwjgl.util.Point;
-import org.lwjgl.util.vector.Vector2f;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import org.rtevo.simulation.Simulation;
 
-public class RobotEvolutionWindow {
-    Simulation simulation;
-    private int width = 1024;
-    private int height = 512;
+@SuppressWarnings("serial")
+class Renderer extends JPanel {
+    private RobotEvolutionWindow window;
+    private Simulation simulation;
 
-    public RobotEvolutionWindow() {
-        try {
-            Display.setDisplayMode(new DisplayMode(width, height));
-            Display.setTitle("Robot Evolution");
-            Display.setVSyncEnabled(true);
-            Display.create();
+    public Renderer(RobotEvolutionWindow window) {
+        this.window = window;
 
-            GL11.glMatrixMode(GL11.GL_PROJECTION);
-            GL11.glLoadIdentity();
-            GL11.glOrtho(0, width, 0, height, 1, -1);
-            GL11.glMatrixMode(GL11.GL_MODELVIEW);
-        } catch (LWJGLException e) {
-            e.printStackTrace();
-            System.exit(0);
+        initUI();
+    }
+
+    private void initUI() {
+        setDoubleBuffered(true);
+    }
+
+    private void setup(Graphics2D g2d) {
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    }
+
+    private void drawBackground(Graphics2D g2d) {
+        g2d.setColor(new Color(50, 50, 50));
+        g2d.fillRect(0, 0, window.getWidth(), window.getHeight());
+    }
+
+    private void drawRenderables(Graphics2D g2d) {
+        if (simulation == null) {
+            return;
+        }
+
+        for (Renderable renderable : simulation.getBodies()) {
+            renderable.draw(g2d);
         }
     }
 
-    public static void drawLine(Point startPoint, Point endPoint, Color color,
-            float alpha, float width) {
-
-        Vector2f start = new Vector2f(startPoint.getX(), startPoint.getY());
-        Vector2f end = new Vector2f(endPoint.getX(), endPoint.getY());
-
-        float dx = startPoint.getX() - endPoint.getX();
-        float dy = startPoint.getY() - endPoint.getY();
-
-        Vector2f rightSide = new Vector2f(dy, -dx);
-        if (rightSide.length() > 0) {
-            rightSide.normalise();
-            rightSide.scale(width / 2);
-        }
-
-        Vector2f leftSide = new Vector2f(-dy, dx);
-        if (leftSide.length() > 0) {
-            leftSide.normalise();
-            leftSide.scale(width / 2);
-        }
-
-        Vector2f one = new Vector2f();
-        Vector2f.add(leftSide, start, one);
-
-        Vector2f two = new Vector2f();
-        Vector2f.add(rightSide, start, two);
-
-        Vector2f three = new Vector2f();
-        Vector2f.add(rightSide, end, three);
-
-        Vector2f four = new Vector2f();
-        Vector2f.add(leftSide, end, four);
-
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-        GL11.glVertex2f(one.x, one.y);
-        GL11.glVertex2f(two.x, two.y);
-        GL11.glVertex2f(three.x, three.y);
-        GL11.glVertex2f(four.x, four.y);
-        GL11.glColor4f(1, 1, 1, 1);
-        GL11.glEnd();
+    private void drawInfo(Graphics2D g2d) {
+        Font font = new Font("Serif", Font.BOLD, 40);
+        g2d.setFont(font);
     }
 
-    public void updateDisplay() {
-        if (simulation != null) {
-            // TODO render simulation
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
 
-            // clear the screen and depth buffer
-            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        Graphics2D g2d = (Graphics2D) g;
 
-            
-            
-            drawLine(new Point(50, 50), new Point(100, 100), new Color(255,
-                    255, 255), (float) 0.5, 5);
+        setup(g2d);
+        drawBackground(g2d);
+        drawRenderables(g2d);
+        drawInfo(g2d);
+    }
 
-            Display.update();
-        }
+    public Simulation getSimulation() {
+        return simulation;
     }
 
     public void setSimulation(Simulation simulation) {
         this.simulation = simulation;
     }
 
-    public void destroy() {
-        Display.destroy();
+}
+
+@SuppressWarnings("serial")
+public class RobotEvolutionWindow extends JFrame {
+    Renderer renderer;
+
+    public RobotEvolutionWindow(int width, int height) {
+        setTitle("Robot Evolution");
+        setSize(width, height);
+        setLocationRelativeTo(null);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        renderer = new Renderer(this);
+        add(renderer);
     }
 
-    public boolean isCloseRequested() {
-        return Display.isCloseRequested();
+    public void updateDisplay() {
+        renderer.repaint();
+    }
+
+    public void setSimulation(Simulation simulation) {
+        renderer.setSimulation(simulation);
     }
 
 }

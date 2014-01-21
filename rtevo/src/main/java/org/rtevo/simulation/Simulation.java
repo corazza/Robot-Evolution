@@ -15,6 +15,7 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.rtevo.genetics.Chromosome;
+import org.rtevo.gui.Renderable;
 import org.rtevo.util.RandomUtil;
 
 /**
@@ -32,20 +33,20 @@ public class Simulation implements Callable<List<Result>> {
     // TODO map Body -> Chromosome?
 
     // simulation:
-    private int timeStep = 10; // in milliseconds
+    private float timeStep = 0.01f; // in seconds
     private int robotMilliseconds;
 
     private int velocityIterations = 6;
     private int positionIterations = 2;
 
-    private Vec2 gravity;
+    private float gravity;
     private boolean doSleep = true;
     private World world;
 
-    private List<Body> bodies;
+    private List<Renderable> bodies;
 
     // temporary
-    int counter = 0;
+    float counter = 0;
 
     /**
      * 
@@ -53,21 +54,17 @@ public class Simulation implements Callable<List<Result>> {
      * @param chromosomes
      *            list of all the chromosomes that should be evaluated by this
      *            simulation
-     * @param timeStep
-     *            the number of milliseconds that each update lasts
      */
-    public Simulation(List<Chromosome> chromosomes, int timeStep,
-            int robotMilliseconds) {
+    public Simulation(List<Chromosome> chromosomes, int robotMilliseconds,
+            float gravity) {
         if (chromosomes.isEmpty()) {
             throw new IllegalArgumentException(
                     "There must be more than 0 chromosomes in the simulation.");
         }
 
         this.chromosomes = chromosomes;
-        this.timeStep = timeStep;
         this.robotMilliseconds = robotMilliseconds;
-
-        bodies = new ArrayList<Body>();
+        this.gravity = gravity;
     }
 
     // MEMO - FOR THREADS - the current implementation is not optimal because if
@@ -84,15 +81,17 @@ public class Simulation implements Callable<List<Result>> {
      */
     public void setup() {
         // create the world
-        gravity = new Vec2(0.0f, -10.0f);
-        world = new World(gravity);
+        // Vec2 gravityVec2 = new Vec2(10.0f, 0 * gravity);
+        Vec2 gravityVec2 = new Vec2(10.0f, 105.0f);
+        world = new World(gravityVec2);
+        bodies = new ArrayList<Renderable>();
         world.setAllowSleep(doSleep);
 
         // set all the chromosomes
         for (Chromosome chromosome : chromosomes) {
             // body definition
             BodyDef bd = new BodyDef();
-            bd.position.set(50, 50);
+            bd.position.set(50, 150);
             bd.type = BodyType.DYNAMIC;
 
             // define shape of the body.
@@ -110,15 +109,13 @@ public class Simulation implements Callable<List<Result>> {
             Body body = world.createBody(bd);
             body.createFixture(fd);
 
-            bodies.add(body);
+            Renderable renderable = new Renderable(body);
+            bodies.add(renderable);
         }
     }
 
     /**
      * Advances the simulation.
-     * 
-     * @param timeStep
-     *            the number of milliseconds to advance the simulation
      */
     // MEMO check if this is compatible with JBox2D (the approach of using +int
     // milliseconds to advance the simulation)
@@ -132,7 +129,7 @@ public class Simulation implements Callable<List<Result>> {
     public synchronized void removeFinished() {
         counter += timeStep;
 
-        if (counter > robotMilliseconds) {
+        if (counter * 1000 > robotMilliseconds) {
             Chromosome finished = chromosomes.remove(0);
             Result finishedResult = new Result(finished, RandomUtil.random(0,
                     100));
@@ -154,11 +151,8 @@ public class Simulation implements Callable<List<Result>> {
         return results;
     }
 
-    /**
-     * Returns an array of Renderable objects.
-     */
-    public synchronized void snapshot() {
-
+    public synchronized List<Renderable> getBodies() {
+        return bodies;
     }
 
     public void addChromosome(Chromosome toAdd) {
@@ -178,8 +172,20 @@ public class Simulation implements Callable<List<Result>> {
         return results;
     }
 
-    public int getTimeStep() {
+    public void setTimeStep(float timeStep) {
+        this.timeStep = timeStep;
+    }
+
+    public float getTimeStep() {
         return timeStep;
+    }
+
+    public float getGravity() {
+        return gravity;
+    }
+
+    public void setGravity(float gravity) {
+        this.gravity = gravity;
     }
 
 }

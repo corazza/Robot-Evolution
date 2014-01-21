@@ -5,57 +5,93 @@ package org.rtevo.simulation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.rtevo.genetics.Chromosome;
 import org.rtevo.genetics.ChromosomeFactory;
+
+class OpJobThreadFactory implements ThreadFactory {
+    private int priority;
+    private boolean daemon;
+    private final String namePrefix;
+    private static final AtomicInteger poolNumber = new AtomicInteger(1);
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+    public OpJobThreadFactory(int priority) {
+        this(priority, true);
+    }
+
+    public OpJobThreadFactory(int priority, boolean daemon) {
+        this.priority = priority;
+        this.daemon = daemon;
+        namePrefix = "jobpool-" + poolNumber.getAndIncrement() + "-thread-";
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+        t.setDaemon(daemon);
+        t.setPriority(priority);
+        return t;
+    }
+}
 
 /**
  * @author Jan Corazza
  * 
  */
 public class Generation {
+    private static ThreadPoolExecutor workerPool;
+    private static int parallelSimulations;
+
+    public static void configureWorkerPool(int parallelSimulations) {
+        Generation.parallelSimulations = parallelSimulations;
+
+        workerPool = new ThreadPoolExecutor(parallelSimulations,
+                parallelSimulations, 100L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
+
+        workerPool
+                .setThreadFactory(new OpJobThreadFactory(Thread.MAX_PRIORITY));
+    }
+
     private int numSimulations;
     private List<Chromosome> chromosomes;
     private List<Result> results = new ArrayList<Result>();
-    private ExecutorService workerPool;
-    private List<Simulation> simulations;
-    private List<Future<List<Result>>> futureSimulationResults = new ArrayList<Future<List<Result>>>();
 
     // configuration cache
-    private int timeStep;
     private int robotMilliseconds;
-    private int parallelSimulations;
+    private float gravity;
+    private List<Simulation> simulations;
+    private List<Future<List<Result>>> futureSimulationResults = new ArrayList<Future<List<Result>>>();
 
     /**
      * Generation from a list of chromosomes
      * 
-     * @param timeStep
      * @param robotMilliseconds
      * @param chromosomes
      */
-    public Generation(int timeStep, int robotMilliseconds,
-            int parallelSimulations, List<Chromosome> chromosomes) {
-        this.timeStep = timeStep;
+    public Generation(int robotMilliseconds, List<Chromosome> chromosomes,
+            float gravity) {
         this.chromosomes = chromosomes;
-        this.parallelSimulations = parallelSimulations;
-
-        workerPool = Executors.newCachedThreadPool();
+        this.robotMilliseconds = robotMilliseconds;
+        this.gravity = gravity;
     }
 
     /**
      * Random generation
      * 
-     * @param timeStep
      * @param robotMilliseconds
      * @param numChromosomes
      */
-    public Generation(int timeStep, int robotMilliseconds,
-            int parallelSimulations, int numChromosomes) {
-        this(timeStep, robotMilliseconds, parallelSimulations,
-                ChromosomeFactory.random(numChromosomes));
+    public Generation(int robotMilliseconds, int numChromosomes, float gravity) {
+        this(robotMilliseconds, ChromosomeFactory.random(numChromosomes),
+                gravity);
     }
 
     /**
@@ -98,14 +134,13 @@ public class Generation {
                     "Not all simulations have finished.");
         }
 
-        return new Generation(timeStep, robotMilliseconds, parallelSimulations,
-                ChromosomeFactory.evolve(results));
+        return new Generation(robotMilliseconds,
+                ChromosomeFactory.evolve(results), gravity);
     }
 
     /**
      * Returns a random sample from the current generation.
      * 
-     * @param timeStep
      * @param robotMilliseconds
      * @return
      */
@@ -114,7 +149,7 @@ public class Generation {
         List<Chromosome> bestChromosomes = new ArrayList<Chromosome>();
         bestChromosomes.add(chromosomes.get(0));
 
-        return new Simulation(bestChromosomes, timeStep, robotMilliseconds);
+        return new Simulation(bestChromosomes, robotMilliseconds, gravity);
     }
 
     /**
@@ -126,7 +161,6 @@ public class Generation {
      *            how many chromosomes should be included in one simulation,
      *            last simulation will have allChromosomes.size() %
      *            chromosomesPerSimulation chromosomes less
-     * @param timeStep
      * @return
      */
     public ArrayList<Simulation> getSimulations(int numSimulations) {
@@ -144,7 +178,7 @@ public class Generation {
             List<Chromosome> taken = new ArrayList<Chromosome>(
                     chromosomes.subList(i * robotsPerSimulation, i
                             * robotsPerSimulation + robotsPerSimulation));
-            simulations.add(new Simulation(taken, timeStep, robotMilliseconds));
+            simulations.add(new Simulation(taken, robotMilliseconds, gravity));
         }
 
         int robotsLeft = numChromosomes % numSimulations;
@@ -175,6 +209,10 @@ public class Generation {
         this.results.addAll(results);
     }
 
+    public int numThreads() {
+        return workerPool.getActiveCount();
+    }
+
     public int getNumSimulations() {
         return numSimulations;
     }
@@ -197,14 +235,6 @@ public class Generation {
 
     public void setResults(ArrayList<Result> results) {
         this.results = results;
-    }
-
-    public int getTimeStep() {
-        return timeStep;
-    }
-
-    public void setTimeStep(int timeStep) {
-        this.timeStep = timeStep;
     }
 
     public int getRobotMilliseconds() {

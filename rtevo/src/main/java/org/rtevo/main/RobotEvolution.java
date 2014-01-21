@@ -22,35 +22,35 @@ import org.rtevo.simulation.Simulation;
 public class RobotEvolution {
     private RobotEvolutionWindow window;
 
-    private int generations;
-    private int robotsPerGeneration;
-    private int timeStep;
-    private int parallelSimulations;
-    private int robotMilliseconds;
+    private Configuration c;
 
     public RobotEvolution(Configuration config) {
-        generations = config.getGenerations();
-        robotsPerGeneration = config.getRobotsPerGeneration();
-        timeStep = config.getTimeStep();
-        parallelSimulations = config.getParallelSimulations();
-        robotMilliseconds = config.getRobotMilliseconds();
+        c = config;
+
+        Generation.configureWorkerPool(c.parallelSimulations);
     }
 
     public void start() {
-        window = new RobotEvolutionWindow();
+        window = new RobotEvolutionWindow(c.windowWidth, c.windowHeight);
 
         // Initialize GA:
-        Generation generation = new Generation(timeStep, robotMilliseconds,
-                parallelSimulations, robotsPerGeneration);
+        Generation generation = new Generation(c.robotMilliseconds,
+                c.robotsPerGeneration, c.gravity);
 
         // Main algorithm
-        for (int i = 0; i < generations; ++i) {
+        for (int i = 0; i < c.generations; ++i) {
+            long wait = 5000;
+            int FPS = 60;
+            int waitTime = 1000 / FPS;
+            long started = System.currentTimeMillis();
+
             // Create all the simulations and start them in their separate
             // threads
             generation.computeAll();
 
             // Create a simulation for a single chromosome
             Simulation presentationSimulation = generation.getSample();
+            presentationSimulation.setTimeStep(0.01f);
             presentationSimulation.setup();
 
             // Submit it to the renderer
@@ -58,26 +58,31 @@ public class RobotEvolution {
 
             // Simulate and render the presentation simulation while real
             // computation is being done in the backend
-            while (!generation.isDone()) {
+
+            while (!generation.isDone()
+                    || started + wait > System.currentTimeMillis()) {
                 presentationSimulation.update();
                 window.updateDisplay();
 
-                if (window.isCloseRequested()) {
-                    exit();
+                try {
+                    Thread.sleep(waitTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
 
             // Evolve
             generation = generation.nextGeneration();
 
-            System.out.println("generation #" + (i + 1) + " done");
+            System.out.println("generation #" + (i + 1) + " done, took "
+                    + (System.currentTimeMillis() - started) + " milliseconds");
         }
 
         exit();
     }
 
     public void exit() {
-        window.destroy();
+        // window.destroy();
 
         // TODO convert to log
         System.out.println("Program done.");
