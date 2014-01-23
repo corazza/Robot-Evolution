@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -15,7 +16,6 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.rtevo.genetics.Chromosome;
-import org.rtevo.gui.Renderable;
 import org.rtevo.util.RandomUtil;
 
 /**
@@ -42,8 +42,6 @@ public class Simulation implements Callable<List<Result>> {
     private float gravity;
     private boolean doSleep = true;
     private World world;
-
-    private List<Renderable> bodies;
 
     // temporary
     float counter = 0;
@@ -76,31 +74,54 @@ public class Simulation implements Callable<List<Result>> {
     // ARE, but ask SO. They WILL BE if using BlockingQueue. Currently
     // unimportant.
 
+    private void setFloor() {
+        // body definition
+        BodyDef bd = new BodyDef();
+        bd.position.set(-25f, 5f);
+        bd.type = BodyType.STATIC;
+
+        // define shape of the body.
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(50f, 0.1f);
+
+        // define fixture of the body.
+        FixtureDef fd = new FixtureDef();
+        fd.shape = shape;
+        fd.density = 0.5f;
+        fd.friction = 0.3f;
+        fd.restitution = 0.5f;
+
+        // create the body and add fixture to it
+        Body body = world.createBody(bd);
+        body.createFixture(fd);
+    }
+
     /**
      * Generate physics objects and add them to the JBox2D world.
      */
     public void setup() {
         // create the world
-        // Vec2 gravityVec2 = new Vec2(10.0f, 0 * gravity);
-        Vec2 gravityVec2 = new Vec2(10.0f, 105.0f);
+        Vec2 gravityVec2 = new Vec2(0f, gravity);
+        // Vec2 gravityVec2 = new Vec2(10.0f, 105.0f);
         world = new World(gravityVec2);
-        bodies = new ArrayList<Renderable>();
         world.setAllowSleep(doSleep);
+
+        setFloor();
 
         // set all the chromosomes
         for (Chromosome chromosome : chromosomes) {
             // body definition
             BodyDef bd = new BodyDef();
-            bd.position.set(50, 150);
+            bd.position.set(4f, 1.1f);
             bd.type = BodyType.DYNAMIC;
 
             // define shape of the body.
-            CircleShape cs = new CircleShape();
-            cs.m_radius = 0.5f;
+            PolygonShape shape = new PolygonShape();
+            shape.setAsBox(0.5f, 1f);
 
             // define fixture of the body.
             FixtureDef fd = new FixtureDef();
-            fd.shape = cs;
+            fd.shape = shape;
             fd.density = 0.5f;
             fd.friction = 0.3f;
             fd.restitution = 0.5f;
@@ -108,9 +129,6 @@ public class Simulation implements Callable<List<Result>> {
             // create the body and add fixture to it
             Body body = world.createBody(bd);
             body.createFixture(fd);
-
-            Renderable renderable = new Renderable(body);
-            bodies.add(renderable);
         }
     }
 
@@ -151,8 +169,8 @@ public class Simulation implements Callable<List<Result>> {
         return results;
     }
 
-    public synchronized List<Renderable> getBodies() {
-        return bodies;
+    public synchronized World getWorld() {
+        return world;
     }
 
     public void addChromosome(Chromosome toAdd) {

@@ -4,7 +4,7 @@
 package org.rtevo.main;
 
 import org.rtevo.common.Configuration;
-import org.rtevo.gui.RobotEvolutionWindow;
+import org.rtevo.gui.Window;
 import org.rtevo.simulation.Generation;
 import org.rtevo.simulation.Simulation;
 
@@ -20,7 +20,7 @@ import org.rtevo.simulation.Simulation;
  * 
  */
 public class RobotEvolution {
-    private RobotEvolutionWindow window;
+    private Window window;
 
     private Configuration c;
 
@@ -31,7 +31,7 @@ public class RobotEvolution {
     }
 
     public void start() {
-        window = new RobotEvolutionWindow(c.windowWidth, c.windowHeight);
+        window = new Window(c.windowWidth, c.windowHeight);
 
         // Initialize GA:
         Generation generation = new Generation(c.robotMilliseconds,
