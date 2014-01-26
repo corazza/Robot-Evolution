@@ -7,16 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.rtevo.genetics.Chromosome;
-import org.rtevo.util.RandomUtil;
+import org.rtevo.util.RandUtil;
 
 /**
  * Evaluates chromosomes. Encapsulates and represents a simulation.
@@ -30,7 +30,7 @@ public class Simulation implements Callable<List<Result>> {
     // array of results for each chromosome
     private List<Result> results = new ArrayList<Result>();
 
-    // TODO map Body -> Chromosome?
+    private ArrayList<Robot> robots = new ArrayList<Robot>();
 
     // simulation:
     private float timeStep = 0.01f; // in seconds
@@ -74,62 +74,47 @@ public class Simulation implements Callable<List<Result>> {
     // ARE, but ask SO. They WILL BE if using BlockingQueue. Currently
     // unimportant.
 
-    private void setFloor() {
+    private void setGround() {
         // body definition
         BodyDef bd = new BodyDef();
-        bd.position.set(-25f, 5f);
+        bd.position.set(-25f, 10f);
         bd.type = BodyType.STATIC;
 
         // define shape of the body.
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(50f, 0.1f);
+        shape.setAsBox(50f, 2f);
 
         // define fixture of the body.
         FixtureDef fd = new FixtureDef();
         fd.shape = shape;
-        fd.density = 0.5f;
+        Filter filter = new Filter();
+        filter.groupIndex = 1;
+        fd.filter = filter;
         fd.friction = 0.3f;
         fd.restitution = 0.5f;
 
         // create the body and add fixture to it
         Body body = world.createBody(bd);
         body.createFixture(fd);
+        body.setUserData(new GroundUserData());
+    }
+
+    private void setRobots() {
+        for (Chromosome chromosome : chromosomes) {
+            robots.add(new Robot(chromosome, world));
+        }
     }
 
     /**
      * Generate physics objects and add them to the JBox2D world.
      */
     public void setup() {
-        // create the world
         Vec2 gravityVec2 = new Vec2(0f, gravity);
-        // Vec2 gravityVec2 = new Vec2(10.0f, 105.0f);
         world = new World(gravityVec2);
         world.setAllowSleep(doSleep);
 
-        setFloor();
-
-        // set all the chromosomes
-        for (Chromosome chromosome : chromosomes) {
-            // body definition
-            BodyDef bd = new BodyDef();
-            bd.position.set(4f, 1.1f);
-            bd.type = BodyType.DYNAMIC;
-
-            // define shape of the body.
-            PolygonShape shape = new PolygonShape();
-            shape.setAsBox(0.5f, 1f);
-
-            // define fixture of the body.
-            FixtureDef fd = new FixtureDef();
-            fd.shape = shape;
-            fd.density = 0.5f;
-            fd.friction = 0.3f;
-            fd.restitution = 0.5f;
-
-            // create the body and add fixture to it
-            Body body = world.createBody(bd);
-            body.createFixture(fd);
-        }
+        setGround();
+        setRobots();
     }
 
     /**
@@ -139,18 +124,22 @@ public class Simulation implements Callable<List<Result>> {
     // milliseconds to advance the simulation)
     public synchronized void update() {
         world.step(timeStep, velocityIterations, positionIterations);
+
+        // TODO reset motors
     }
 
     /**
      * Searches for failed chromosomes and removes them from the simulation
      */
     public synchronized void removeFinished() {
+        // TODO remove finished
+
         counter += timeStep;
 
         if (counter * 1000 > robotMilliseconds) {
             Chromosome finished = chromosomes.remove(0);
-            Result finishedResult = new Result(finished, RandomUtil.random(0,
-                    100));
+            Result finishedResult = new Result(finished,
+                    RandUtil.random(0, 100));
             results.add(finishedResult);
 
             counter = 0;

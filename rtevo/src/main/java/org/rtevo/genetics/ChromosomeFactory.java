@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.rtevo.simulation.Result;
-import org.rtevo.util.RandomUtil;
+import org.rtevo.util.RandUtil;
 
 /**
  * @author Jan Corazza
@@ -19,25 +19,11 @@ public class ChromosomeFactory {
     // next generation
     private static double cutoff = 20;
 
-    /**
-     * Returns a random chromosome in some limits
-     * 
-     * @return
-     */
-    public static Chromosome random() {
-        Chromosome chromosome = new Chromosome();
-
-        // TODO randomize
-
-        return chromosome;
-    }
-
     public static List<Chromosome> random(int n) {
         ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 
         for (int i = 0; i < n; ++i) {
-            Chromosome chromosome = random();
-            chromosomes.add(chromosome);
+            chromosomes.add(Chromosome.random());
         }
 
         return chromosomes;
@@ -71,7 +57,7 @@ public class ChromosomeFactory {
         }
 
         while (chromosomes.size() != originalSize) {
-            int outreach = RandomUtil.random(1, myResults.size());
+            int outreach = RandUtil.random(1, myResults.size());
             int need = originalSize - chromosomes.size();
 
             if (outreach > need) {
@@ -96,8 +82,8 @@ public class ChromosomeFactory {
      * @return new Chromosome object that has been mutated from 1st parameter
      */
     private static Chromosome mutate(Chromosome chromosome) {
-        // TODO vrati slican Chromosome
-        return random();
+        // TODO mutate
+        return Chromosome.random();
     }
 
 }

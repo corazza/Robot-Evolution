@@ -42,7 +42,7 @@ public class Configuration {
         windowWidth = Integer.parseInt(p.getProperty("windowWidth", "1024"));
         windowHeight = Integer.parseInt(p.getProperty("windowHeight", "512"));
 
-        gravity = Float.parseFloat(p.getProperty("gravity", "1"));
+        gravity = Float.parseFloat(p.getProperty("gravity", "10"));
     }
 
     private static Properties getDefaultProperties() {

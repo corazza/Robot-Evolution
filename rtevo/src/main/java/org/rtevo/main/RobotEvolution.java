@@ -39,7 +39,7 @@ public class RobotEvolution {
 
         // Main algorithm
         for (int i = 0; i < c.generations; ++i) {
-            long wait = 5000;
+            long wait = 1500000;
             int FPS = 60;
             int waitTime = 1000 / FPS;
             long started = System.currentTimeMillis();
@@ -82,11 +82,7 @@ public class RobotEvolution {
     }
 
     public void exit() {
-        // window.destroy();
-
-        // TODO convert to log
         System.out.println("Program done.");
-
         System.exit(0);
     }
 

@@ -145,7 +145,7 @@ public class Generation {
      * @return
      */
     public Simulation getSample() {
-        // CHECKLATER if chromosomes.get(0) is indeed the best one
+        // TODO check if chromosomes.get(0) is indeed the best one
         List<Chromosome> bestChromosomes = new ArrayList<Chromosome>();
         bestChromosomes.add(chromosomes.get(0));
 

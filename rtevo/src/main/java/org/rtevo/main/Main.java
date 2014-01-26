@@ -25,8 +25,6 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) {
-        // TODO start GUI configuration
-
         Configuration config = new Configuration();
         RobotEvolution app = new RobotEvolution(config);
         app.start();
