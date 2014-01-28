@@ -21,6 +21,8 @@ public class Robot {
     private HashMap<Part, Body> partToBody = new HashMap<Part, Body>();
 
     public Robot(Chromosome chromosome, World world) {
+        // TODO correctly position the parts and angles
+
         this.world = world;
 
         for (PartJoint partJoint : chromosome.partJoints) {
@@ -39,8 +41,9 @@ public class Robot {
     private Body setPart(Part part) {
         // body definition
         BodyDef bd = new BodyDef();
-        bd.position.set(RandUtil.random(1f, 20f), RandUtil.random(1f, 4f));
+        bd.position.set(0f, -10f);
         bd.angle = 0f;
+//        bd.angularDamping = 0.5f;
         bd.type = BodyType.DYNAMIC;
 
         // define shape of the body.
@@ -82,7 +85,7 @@ public class Robot {
         jointDef.lowerAngle = GeomUtil.circle(partJoint.rotateFrom);
         jointDef.upperAngle = GeomUtil.circle(partJoint.rotateTo);
         jointDef.enableLimit = true;
-        jointDef.maxMotorTorque = 50.0f;
+        jointDef.maxMotorTorque = 10.0f; // TODO limit maximum torque
         jointDef.motorSpeed = GeomUtil.circle(partJoint.angularVelocity);
         jointDef.enableMotor = true;
 
@@ -91,7 +94,7 @@ public class Robot {
 
     public float getDistance() {
         // TODO getDistance
-        
+
         return RandUtil.random(0f, 100f);
     }
 

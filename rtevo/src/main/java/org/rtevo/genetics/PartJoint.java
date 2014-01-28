@@ -31,16 +31,16 @@ public class PartJoint {
     public static PartJoint random() {
         PartJoint partJoint = new PartJoint();
 
-        partJoint.angularVelocity = RandUtil.random(0.01f, 1f);
+        partJoint.angularVelocity = RandUtil.random(0f, 1f);
         partJoint.rotateFrom = RandUtil.random(0f, 1f);
         partJoint.rotateTo = RandUtil.random(0f, 1f);
-        
+
         if (partJoint.rotateFrom > partJoint.rotateTo) {
             float tmp = partJoint.rotateFrom;
             partJoint.rotateFrom = partJoint.rotateTo;
             partJoint.rotateTo = tmp;
         }
-        
+
         partJoint.percentOne = RandUtil.random(0f, 1f);
         partJoint.percentTwo = RandUtil.random(0f, 1f);
 

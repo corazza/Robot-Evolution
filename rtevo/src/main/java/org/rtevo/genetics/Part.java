@@ -12,10 +12,10 @@ import org.rtevo.util.RandUtil;
  *
  */
 public class Part {
-    public static final float minWidth = 0.1f;
-    public static final float maxWidth = 4f;
-    public static final float minHeight = 0.1f;
-    public static final float maxHeight = 4f;
+    public static final float minWidth = 0.5f;
+    public static final float maxWidth = 2f;
+    public static final float minHeight = 0.5f;
+    public static final float maxHeight = 2f;
 
     public float width;
     public float height;
@@ -54,9 +54,6 @@ public class Part {
 
         x -= width / 2;
         y -= height / 2;
-
-        System.out.println("for " + percent + ": (" + x + ", " + y + ") width="
-                + width + " height=" + height);
 
         // return new Vec2(width, -height);
         return new Vec2(x, y);

@@ -15,6 +15,8 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.rtevo.genetics.Chromosome;
 import org.rtevo.util.RandUtil;
 
@@ -74,15 +76,16 @@ public class Simulation implements Callable<List<Result>> {
     // ARE, but ask SO. They WILL BE if using BlockingQueue. Currently
     // unimportant.
 
+    // TODO implement proper (chain) ground
     private void setGround() {
         // body definition
         BodyDef bd = new BodyDef();
-        bd.position.set(-25f, 10f);
+        bd.position.set(0f, 0f);
         bd.type = BodyType.STATIC;
 
         // define shape of the body.
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(50f, 2f);
+        shape.setAsBox(5f, 0.5f);
 
         // define fixture of the body.
         FixtureDef fd = new FixtureDef();
@@ -125,7 +128,13 @@ public class Simulation implements Callable<List<Result>> {
     public synchronized void update() {
         world.step(timeStep, velocityIterations, positionIterations);
 
-        // TODO reset motors
+        for (RevoluteJoint joint = (RevoluteJoint) world.getJointList(); joint != null; joint = (RevoluteJoint) joint
+                .getNext()) {
+            if (joint.getJointAngle() <= joint.getLowerLimit()
+                    || joint.getJointAngle() >= joint.getUpperLimit()) {
+                joint.setMotorSpeed(-joint.getMotorSpeed());
+            }
+        }
     }
 
     /**

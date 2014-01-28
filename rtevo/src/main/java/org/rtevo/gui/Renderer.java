@@ -9,6 +9,15 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 
@@ -25,13 +34,15 @@ import org.rtevo.simulation.Simulation;
  * 
  */
 @SuppressWarnings("serial")
-class Renderer extends JPanel {
+class Renderer extends JPanel implements ActionListener {
+    // TODO correctly render, with scaling, movable camera, and (0, 0) in the
+    // middle
+
     private Window window;
     private Simulation simulation;
     private Graphics2D currentGraphics;
-
-    // physics->visual transformations
-    private static final float pixelsPerMeter = 50;
+    private Camera camera;
+    private Vector startDrag;
 
     // rendering
     private static final Color partFillColor = new Color(200, 200, 205, 100);
@@ -41,21 +52,62 @@ class Renderer extends JPanel {
     private static final Color backgroundColor = new Color(50, 50, 50);
     private static final Color defaultColor = new Color(250, 250, 250, 100);
 
-    private static final BasicStroke partOutlineStroke = new BasicStroke(1.5f);
+    private static final BasicStroke partOutlineStroke = new BasicStroke(2.5f);
+    private static final BasicStroke groundOutlineStroke = new BasicStroke(1.5f);
     private static final BasicStroke defaultStroke = new BasicStroke(1);
+    private static final Font font = new Font(Font.SERIF, Font.PLAIN, 12);
+    
+    private static final float pPM = 200.0f;
 
     public Renderer(Window window) {
         this.window = window;
+        camera = new Camera(this);
+
+        addKeyListener(new RendererKeyAdapter());
+        addMouseListener(new RendererMouseAdapter());
+        addMouseMotionListener(new RendererMouseMotionAdapter());
+        addMouseWheelListener(new RendererMouseWheelListener());
+
+        setFocusable(true);
 
         initUI();
     }
 
-    private void initUI() {
-        setDoubleBuffered(true);
+    private class RendererKeyAdapter extends KeyAdapter {
+        public void keyReleased(KeyEvent e) {
+            System.out.println("rel: " + KeyEvent.getKeyText(e.getKeyCode()));
+        }
+
+        public void keyPressed(KeyEvent e) {
+            System.out.println("pre: " + KeyEvent.getKeyText(e.getKeyCode()));
+        }
     }
 
-    private float metersToPixels(float a) {
-        return pixelsPerMeter * a;
+    private class RendererMouseAdapter extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            camera.startDragging(e.getX(), e.getY());
+        }
+
+    }
+
+    private class RendererMouseMotionAdapter extends MouseMotionAdapter {
+        public void mouseDragged(MouseEvent e) {
+            camera.updateDragging(e.getX(), e.getY());
+        }
+
+    }
+
+    private class RendererMouseWheelListener implements MouseWheelListener {
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            camera.scrolled(e.getWheelRotation());
+        }
+
+    }
+
+    private void initUI() {
+        setDoubleBuffered(true);
     }
 
     private void setup() {
@@ -66,6 +118,8 @@ class Renderer extends JPanel {
                 RenderingHints.VALUE_ANTIALIAS_ON);
         currentGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        currentGraphics.setFont(font);
     }
 
     private void drawBackground() {
@@ -76,12 +130,20 @@ class Renderer extends JPanel {
     private void fillShape(PolygonShape shape) {
         GeneralPath groundPath = new GeneralPath();
         Vec2 point = shape.getVertex(0);
+        Vector translated = camera.translateRelative(point);
+//        Vector translated = new Vector((int) (point.x * pPM), (int) (point.y * pPM));
 
-        groundPath.moveTo(metersToPixels(point.x), metersToPixels(point.y));
+        String text = "The quick brown fox jumped over the lazy dog";
+
+        // currentGraphics.drawString(text, 20, 30);
+
+        groundPath.moveTo(translated.x, translated.y);
 
         for (int i = 1; i < shape.getVertexCount(); ++i) {
             point = shape.getVertex(i);
-            groundPath.lineTo(metersToPixels(point.x), metersToPixels(point.y));
+            translated = camera.translateRelative(point);
+//            translated = new Vector((int) (point.x * pPM), (int) (point.y * pPM));
+            groundPath.lineTo(translated.x, translated.y);
         }
 
         groundPath.closePath();
@@ -101,9 +163,16 @@ class Renderer extends JPanel {
         for (; i < shape.getVertexCount(); ++i) {
             Vec2 point2 = shape.getVertex(i);
 
-            currentGraphics.draw(new Line2D.Float(metersToPixels(point1.x),
-                    metersToPixels(point1.y), metersToPixels(point2.x),
-                    metersToPixels(point2.y)));
+            Vector translated1 = camera.translateRelative(point1);
+            Vector translated2 = camera.translateRelative(point2);
+
+//            Vector translated1 = new Vector((int) (point1.x * pPM), (int) (point1.y * pPM));
+//            Vector translated2 = new Vector((int) (point2.x * pPM), (int) (point2.y * pPM));
+            
+            Line2D line = new Line2D.Float(translated1.x, translated1.y,
+                    translated2.x, translated2.y);
+
+            currentGraphics.draw(line);
 
             point1 = point2;
         }
@@ -111,10 +180,16 @@ class Renderer extends JPanel {
         point1 = shape.getVertex(i - 1);
         Vec2 point2 = shape.getVertex(0);
 
-        currentGraphics.draw(new Line2D.Float(metersToPixels(point1.x),
-                metersToPixels(point1.y), metersToPixels(point2.x),
-                metersToPixels(point2.y)));
+        Vector translated1 = camera.translateRelative(point1);
+        Vector translated2 = camera.translateRelative(point2);
 
+//        Vector translated1 = new Vector((int) (point1.x * pPM), (int) (point1.y * pPM));
+//        Vector translated2 = new Vector((int) (point2.x * pPM), (int) (point2.y * pPM));
+
+        Line2D line = new Line2D.Float(translated1.x, translated1.y,
+                translated2.x, translated2.y);
+
+        currentGraphics.draw(line);
     }
 
     private void outlineShape(PolygonShape shape, Color color) {
@@ -124,8 +199,10 @@ class Renderer extends JPanel {
 
     private void drawBody(Body body) {
         // setup the transforms
-        currentGraphics.translate(metersToPixels(body.getPosition().x),
-                metersToPixels(body.getPosition().y));
+         Vector position = camera.translate(body.getPosition());
+//        Vector position = new Vector((int) (body.getPosition().x * pPM) + 512,
+//                (int) (body.getPosition().y * pPM) + 400);
+        currentGraphics.translate(position.x, position.y);
         currentGraphics.rotate(body.getAngle());
 
         // do the actual rendering
@@ -139,14 +216,14 @@ class Renderer extends JPanel {
                 outlineShape(shape, partOutlineColor);
             } else {
                 fillShape(shape, groundFillColor);
+                currentGraphics.setStroke(groundOutlineStroke);
                 outlineShape(shape, groundOutlineColor);
             }
         }
 
         // clean up
         currentGraphics.rotate(-body.getAngle());
-        currentGraphics.translate(-metersToPixels(body.getPosition().x),
-                -metersToPixels(body.getPosition().y));
+        currentGraphics.translate(-position.x, -position.y);
         currentGraphics.setColor(defaultColor);
         currentGraphics.setStroke(defaultStroke);
     }
@@ -185,6 +262,9 @@ class Renderer extends JPanel {
 
     public void setSimulation(Simulation simulation) {
         this.simulation = simulation;
+    }
+
+    public void actionPerformed(ActionEvent e) {
     }
 
 }

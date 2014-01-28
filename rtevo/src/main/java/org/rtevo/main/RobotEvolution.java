@@ -26,6 +26,10 @@ public class RobotEvolution {
 
     public RobotEvolution(Configuration config) {
         c = config;
+        
+        if (c.parallelSimulations < 1) {
+            throw new IllegalArgumentException("The number of parallel simulations must be greater than 0");
+        }
 
         Generation.configureWorkerPool(c.parallelSimulations);
     }
