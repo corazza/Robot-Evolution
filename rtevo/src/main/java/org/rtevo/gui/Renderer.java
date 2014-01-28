@@ -52,8 +52,8 @@ class Renderer extends JPanel implements ActionListener {
     private static final Color backgroundColor = new Color(50, 50, 50);
     private static final Color defaultColor = new Color(250, 250, 250, 100);
 
-    private static final BasicStroke partOutlineStroke = new BasicStroke(2.5f);
-    private static final BasicStroke groundOutlineStroke = new BasicStroke(1.5f);
+    private static final BasicStroke partOutlineStroke = new BasicStroke(1f);
+    private static final BasicStroke groundOutlineStroke = new BasicStroke(1f);
     private static final BasicStroke defaultStroke = new BasicStroke(1);
     private static final Font font = new Font(Font.SERIF, Font.PLAIN, 12);
     
