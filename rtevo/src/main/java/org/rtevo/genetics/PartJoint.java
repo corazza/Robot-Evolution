@@ -6,7 +6,7 @@ package org.rtevo.genetics;
 import org.rtevo.util.RandUtil;
 
 /**
- * @author Jan Corazza
+ * @author Jan Corazza & Luka Bubalo
  * 
  */
 public class PartJoint {

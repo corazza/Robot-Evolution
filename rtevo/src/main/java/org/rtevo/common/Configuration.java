@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * @author Jan Corazza
+ * @author Jan Corazza & Luka Bubalo
  * 
  */
 public class Configuration {

@@ -12,7 +12,8 @@ import org.rtevo.util.RandUtil;
  *
  */
 public class Part {
-    public static final float minWidth = 0.5f;
+	//performance of shapes
+   	public static final float minWidth = 0.5f;
     public static final float maxWidth = 2f;
     public static final float minHeight = 0.5f;
     public static final float maxHeight = 2f;
@@ -22,7 +23,8 @@ public class Part {
 
     // joints connected to this shape
     public ArrayList<PartJoint> partJoints = new ArrayList<PartJoint>();
-
+    
+    //randomization performances
     public static Part random() {
         Part part = new Part();
         part.width = RandUtil.random(Part.minWidth, Part.maxWidth);
@@ -30,7 +32,8 @@ public class Part {
 
         return part;
     }
-
+    
+    //getting anchor
     public Vec2 getAnchor(float percent) {
         float x = 0;
         float y = 0;

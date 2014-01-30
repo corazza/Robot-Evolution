@@ -11,7 +11,7 @@ import org.rtevo.simulation.Result;
 import org.rtevo.util.RandUtil;
 
 /**
- * @author Jan Corazza
+ * @author Jan Corazza & Luka Bubalo
  * 
  */
 public class ChromosomeFactory {
@@ -82,8 +82,23 @@ public class ChromosomeFactory {
      * @return new Chromosome object that has been mutated from 1st parameter
      */
     private static Chromosome mutate(Chromosome chromosome) {
-        // TODO mutate
-        return Chromosome.random();
+        Chromosome mutated = new Chromosome();
+        mutated = chromosome;
+        
+        for( PartJoint i : partJoints ) {
+        	if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		PartJoint partJointToMutate = new PartJoint();
+        		
+        	}
+        	
+        }
+        
+        return mutated;
     }
 
+    private static Chromosome crossover(Chromosome chromofirst, Chromosome chromosecond) {
+    	
+    	return null;
+    }
+   
 }
