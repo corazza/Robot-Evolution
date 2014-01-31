@@ -17,6 +17,7 @@ public class Window extends JFrame {
 
         renderer = new Renderer(this);
         add(renderer);
+        renderer.revalidate();
     }
 
     public void updateDisplay() {

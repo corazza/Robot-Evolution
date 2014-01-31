@@ -6,7 +6,7 @@ package org.rtevo.genetics;
 import org.rtevo.util.RandUtil;
 
 /**
- * @author Jan Corazza
+ * @author Jan Corazza & Luka Bubalo
  * 
  */
 public class PartJoint {
@@ -23,9 +23,9 @@ public class PartJoint {
     public PartJoint() {
     }
 
-    public PartJoint(Part shapeOne, Part shapeTwo) {
-        this.partOne = shapeOne;
-        this.partTwo = shapeTwo;
+    public PartJoint(Part partOne, Part partTwo) {
+        this.partOne = partOne;
+        this.partTwo = partTwo;
     }
 
     public static PartJoint random() {

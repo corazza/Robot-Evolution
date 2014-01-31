@@ -11,7 +11,7 @@ import org.rtevo.simulation.Result;
 import org.rtevo.util.RandUtil;
 
 /**
- * @author Jan Corazza
+ * @author Jan Corazza & Luka Bubalo
  * 
  */
 public class ChromosomeFactory {
@@ -81,19 +81,69 @@ public class ChromosomeFactory {
      *            Chromosome object to mutate
      * @return new Chromosome object that has been mutated from 1st parameter
      */
-    private static Chromosome mutate(Chromosome chromosome) {
-        // TODO mutate
 
-        Chromosome mutated = new Chromosome();
-
-        for (int i = 0; i < chromosome.parts.size(); ++i) {
-            Part part = chromosome.parts.get(i);
-            
-            Part mutatedPart = new Part();
-            
+    public static Chromosome mutate(Chromosome chromosome) {
+        //making new chromosome which will be mutated
+    	Chromosome mutated = new Chromosome();
+        for( PartJoint i : chromosome.partJoints ) { 
+        	PartJoint partJ = i;
+        	mutated.partJoints.add(partJ);
         }
-
+        
+        for( Part i: chromosome.parts) {
+        	Part part = i;
+        	mutated.parts.add(part);
+        }
+        
+        //iterating through partJoints arraylist
+        for( PartJoint i : mutated.partJoints ) {
+        	 //randomization genes
+        	 float rotateFromToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float rotateToToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float angularVelocityToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float percentOneToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float percentTwoToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 
+        	 //contition of mutation
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		
+        		if( i.rotateFrom + rotateFromToMutate > 0 ) { i.rotateFrom += rotateFromToMutate;  }
+        		if( i.rotateTo + rotateToToMutate > 0 ) { i.rotateTo += rotateToToMutate;  }
+        		if( i.percentOne + percentOneToMutate > 0 && i.percentOne + percentOneToMutate < 1 ) { 
+        			i.percentOne += percentOneToMutate; 
+        		}
+        		if( i.percentTwo + percentTwoToMutate > 0 && i.percentTwo + percentTwoToMutate < 1 ) { 
+        			i.percentTwo += percentTwoToMutate; 
+        		}
+        		
+        		i.angularVelocity += angularVelocityToMutate;
+        		
+        		}
+        	}
+        
+        for ( Part i : mutated.parts ) {
+        	
+        	float widthToMutate = RandUtil.random(-0.02f, 0.02f);
+        	float heightToMutate = RandUtil.random(-0.02f, 0.02f);
+        	
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		 if( i.width + widthToMutate < 2f && i.width + widthToMutate > 0.5f ) {
+        			 i.width += widthToMutate;
+        		 }
+        		 if( i.height + heightToMutate < 2f && i.height + heightToMutate > 0.5f ) {
+        			 i.height += heightToMutate;
+        		 }
+        	 }
+        	
+        	
+        }
+        
         return mutated;
     }
 
+    public static Chromosome crossover(Chromosome chromofirst, Chromosome chromosecond) {
+    	
+    	return null;
+    }
+   
 }
