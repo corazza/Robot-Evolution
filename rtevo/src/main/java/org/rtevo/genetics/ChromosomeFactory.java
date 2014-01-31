@@ -81,13 +81,27 @@ public class ChromosomeFactory {
      *            Chromosome object to mutate
      * @return new Chromosome object that has been mutated from 1st parameter
      */
-    private static Chromosome mutate(Chromosome chromosome) {
+    public static Chromosome mutate(Chromosome chromosome) {
         Chromosome mutated = new Chromosome();
         mutated = chromosome;
         
-        for( PartJoint i : partJoints ) {
-        	if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		PartJoint partJointToMutate = new PartJoint();
+        for( PartJoint i : mutated.partJoints ) {
+        	 
+        	 float rotateFromToMutate = RandUtil.random(0f, 1f);
+        	 float rotateToToMutate = RandUtil.random(0f, 1f);
+        	 float angularVelocityToMutate = RandUtil.random(0f, 1f);
+        	 float percentOneToMutate = RandUtil.random(0f, 1f);
+        	 float percentTwoToMutate = RandUtil.random(0f, 1f);
+        	 
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		i.rotateFrom += rotateFromToMutate;
+        		i.rotateTo += rotateToToMutate;
+        		i.angularVelocity += angularVelocityToMutate;
+        		i.percentOne += percentOneToMutate;
+        		i.percentTwo += percentTwoToMutate;
+        		
+        		
+        		
         		
         	}
         	
@@ -96,7 +110,7 @@ public class ChromosomeFactory {
         return mutated;
     }
 
-    private static Chromosome crossover(Chromosome chromofirst, Chromosome chromosecond) {
+    public static Chromosome crossover(Chromosome chromofirst, Chromosome chromosecond) {
     	
     	return null;
     }
