@@ -83,7 +83,17 @@ public class ChromosomeFactory {
      */
     private static Chromosome mutate(Chromosome chromosome) {
         // TODO mutate
-        return Chromosome.random();
+
+        Chromosome mutated = new Chromosome();
+
+        for (int i = 0; i < chromosome.parts.size(); ++i) {
+            Part part = chromosome.parts.get(i);
+            
+            Part mutatedPart = new Part();
+            
+        }
+
+        return mutated;
     }
 
 }

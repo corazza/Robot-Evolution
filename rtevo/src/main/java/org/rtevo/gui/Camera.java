@@ -83,7 +83,7 @@ public class Camera {
     public void scrolled(int amount) {
         float newZoom = zoom - amount * scrollScale * zoom;
 
-        if (newZoom > 0.02 && newZoom < 1) {
+        if (newZoom > 0.02 && newZoom < 10) {
             zoom = newZoom;
             return;
         }

@@ -57,7 +57,7 @@ class Renderer extends JPanel implements ActionListener {
     private static final BasicStroke defaultStroke = new BasicStroke(1);
     private static final Font font = new Font(Font.SERIF, Font.PLAIN, 12);
     
-    private static final float pPM = 200.0f;
+    private static final float pPM = 200.0f;//was used for debugging
 
     public Renderer(Window window) {
         this.window = window;
