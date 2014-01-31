@@ -82,28 +82,50 @@ public class ChromosomeFactory {
      * @return new Chromosome object that has been mutated from 1st parameter
      */
     public static Chromosome mutate(Chromosome chromosome) {
-        Chromosome mutated = new Chromosome();
+        //making new chromosome which will be mutated
+    	Chromosome mutated = new Chromosome();
         mutated = chromosome;
         
+        //iterating through partJoints arraylist
         for( PartJoint i : mutated.partJoints ) {
+        	 //randomization genes
+        	 float rotateFromToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float rotateToToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float angularVelocityToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float percentOneToMutate = RandUtil.random(-0.05f, 0.05f);
+        	 float percentTwoToMutate = RandUtil.random(-0.05f, 0.05f);
         	 
-        	 float rotateFromToMutate = RandUtil.random(0f, 1f);
-        	 float rotateToToMutate = RandUtil.random(0f, 1f);
-        	 float angularVelocityToMutate = RandUtil.random(0f, 1f);
-        	 float percentOneToMutate = RandUtil.random(0f, 1f);
-        	 float percentTwoToMutate = RandUtil.random(0f, 1f);
-        	 
+        	 //contition of mutation
         	 if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		i.rotateFrom += rotateFromToMutate;
-        		i.rotateTo += rotateToToMutate;
+        		
+        		if( i.rotateFrom + rotateFromToMutate > 0 ) { i.rotateFrom += rotateFromToMutate;  }
+        		if( i.rotateTo + rotateToToMutate > 0 ) { i.rotateTo += rotateToToMutate;  }
+        		if( i.percentOne + percentOneToMutate > 0 && i.percentOne + percentOneToMutate < 1 ) { 
+        			i.percentOne += percentOneToMutate; 
+        		}
+        		if( i.percentTwo + percentTwoToMutate > 0 && i.percentTwo + percentTwoToMutate < 1 ) { 
+        			i.percentTwo += percentTwoToMutate; 
+        		}
+        		
         		i.angularVelocity += angularVelocityToMutate;
-        		i.percentOne += percentOneToMutate;
-        		i.percentTwo += percentTwoToMutate;
         		
-        		
-        		
-        		
+        		}
         	}
+        
+        for ( Part i : mutated.parts ) {
+        	
+        	float widthToMutate = RandUtil.random(-0.02f, 0.02f);
+        	float heightToMutate = RandUtil.random(-0.02f, 0.02f);
+        	
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		 if( i.width + widthToMutate < 2f && i.width + widthToMutate > 0.5f ) {
+        			 i.width += widthToMutate;
+        		 }
+        		 if( i.height + heightToMutate < 2f && i.height + heightToMutate > 0.5f ) {
+        			 i.height += heightToMutate;
+        		 }
+        	 }
+        	
         	
         }
         

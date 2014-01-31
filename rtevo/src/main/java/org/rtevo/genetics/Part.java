@@ -12,7 +12,7 @@ import org.rtevo.util.RandUtil;
  *
  */
 public class Part {
-	//performance of shapes
+	//performances of shapes
    	public static final float minWidth = 0.5f;
     public static final float maxWidth = 2f;
     public static final float minHeight = 0.5f;
