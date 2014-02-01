@@ -6,6 +6,7 @@ package org.rtevo.main;
 import org.rtevo.common.Configuration;
 import org.rtevo.gui.Window;
 import org.rtevo.simulation.Generation;
+import org.rtevo.simulation.Robot;
 import org.rtevo.simulation.Simulation;
 
 /* MEMO Weight is a property of all objects, joints and body have weights, make them
@@ -26,26 +27,29 @@ public class RobotEvolution {
 
     public RobotEvolution(Configuration config) {
         c = config;
-        
+
         if (c.parallelSimulations < 1) {
-            throw new IllegalArgumentException("The number of parallel simulations must be greater than 0");
+            throw new IllegalArgumentException(
+                    "The number of parallel simulations must be greater than 0");
         }
 
         Generation.configureWorkerPool(c.parallelSimulations);
+        Generation.setGravity(c.gravity);
+        Generation.setTimeStep(c.timeStep);
+        Robot.setRobotMilliseconds(c.robotMilliseconds);
     }
 
     public void start() {
         window = new Window(c.windowWidth, c.windowHeight);
 
         // Initialize GA:
-        Generation generation = new Generation(c.robotMilliseconds,
-                c.robotsPerGeneration, c.gravity);
+        Generation generation = new Generation(c.robotsPerGeneration);
 
         // Main algorithm
         for (int i = 0; i < c.generations; ++i) {
-            long wait = 1500000;
+            long wait = 0;
             int FPS = 60;
-            int waitTime = 1000 / FPS;
+            float waitTime = 1000 / FPS;
             long started = System.currentTimeMillis();
 
             // Create all the simulations and start them in their separate
@@ -54,7 +58,8 @@ public class RobotEvolution {
 
             // Create a simulation for a single chromosome
             Simulation presentationSimulation = generation.getSample();
-            presentationSimulation.setTimeStep(0.01f);
+            presentationSimulation.setExpire(false);
+            presentationSimulation.setTimeStep(waitTime / 1000);
             presentationSimulation.setup();
 
             // Submit it to the renderer
@@ -66,17 +71,18 @@ public class RobotEvolution {
             while (!generation.isDone()
                     || started + wait > System.currentTimeMillis()) {
                 presentationSimulation.update();
+                presentationSimulation.removeFinished();
                 window.updateDisplay();
 
                 try {
-                    Thread.sleep(waitTime);
+                    Thread.sleep((int) waitTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 
             // Evolve
-            generation = generation.nextGeneration();
+            generation = generation.evolve();
 
             System.out.println("generation #" + (i + 1) + " done, took "
                     + (System.currentTimeMillis() - started) + " milliseconds");

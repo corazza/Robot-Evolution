@@ -1,5 +1,6 @@
 package org.rtevo.simulation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -9,41 +10,61 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.rtevo.genetics.Chromosome;
 import org.rtevo.genetics.Part;
 import org.rtevo.genetics.PartJoint;
 import org.rtevo.util.GeomUtil;
-import org.rtevo.util.RandUtil;
 
 public class Robot {
     private World world;
+    private Chromosome chromosome;
     private HashMap<Part, Body> partToBody = new HashMap<Part, Body>();
+    private ArrayList<Body> bodies = new ArrayList<Body>();
+    private ArrayList<Joint> joints = new ArrayList<Joint>();
+
+    private float maxDistance = -1000;
+    private float timer;
+    private float restTimer;
+
+    private static long robotMilliseconds;
+    private static long restMilliseconds;
+
+    public static void setRobotMilliseconds(long robotMilliseconds) {
+        Robot.robotMilliseconds = robotMilliseconds;
+        Robot.restMilliseconds = robotMilliseconds/2;
+    }
 
     public Robot(Chromosome chromosome, World world) {
         // TODO correctly position the parts and angles
-
         this.world = world;
-
+        this.chromosome = chromosome;
+        
         for (PartJoint partJoint : chromosome.partJoints) {
+            // if the bodies for the two parts haven't already been generated
             if (!partToBody.containsKey(partJoint.partOne)) {
-                partToBody.put(partJoint.partOne, setPart(partJoint.partOne));
+                Body bodyOne = setPart(partJoint.partOne);
+                bodies.add(bodyOne);
+                partToBody.put(partJoint.partOne, bodyOne);
             }
 
             if (!partToBody.containsKey(partJoint.partTwo)) {
-                partToBody.put(partJoint.partTwo, setPart(partJoint.partTwo));
+                Body bodyTwo = setPart(partJoint.partTwo);
+                bodies.add(bodyTwo);
+                partToBody.put(partJoint.partTwo, bodyTwo);
             }
 
-            setJoint(partJoint);
+            joints.add(setJoint(partJoint));
         }
     }
 
     private Body setPart(Part part) {
         // body definition
         BodyDef bd = new BodyDef();
-        bd.position.set(0f, -10f);
+        bd.position.set(0f, -5f);
         bd.angle = 0f;
-//        bd.angularDamping = 0.5f;
+        // bd.angularDamping = 0.5f;
         bd.type = BodyType.DYNAMIC;
 
         // define shape of the body.
@@ -68,7 +89,7 @@ public class Robot {
         return body;
     }
 
-    private void setJoint(PartJoint partJoint) {
+    private Joint setJoint(PartJoint partJoint) {
         Body bodyOne = partToBody.get(partJoint.partOne);
         Body bodyTwo = partToBody.get(partJoint.partTwo);
 
@@ -89,13 +110,58 @@ public class Robot {
         jointDef.motorSpeed = GeomUtil.circle(partJoint.angularVelocity);
         jointDef.enableMotor = true;
 
-        world.createJoint(jointDef);
+        return world.createJoint(jointDef);
+    }
+
+    public Chromosome getChromosome() {
+        return chromosome;
+    }
+
+    public Result removeFromWorld() {
+        for (Body body : bodies) {
+            world.destroyBody(body);
+        }
+
+        for (Joint joint : joints) {
+            world.destroyJoint(joint);
+        }
+
+        return new Result(chromosome, getDistance());
+    }
+
+    public boolean isDone(float time) {
+        timer += time;
+
+        if (timer * 1000 > robotMilliseconds) {
+            return true;
+        }
+
+        float distance = getDistance();
+
+        if (distance > maxDistance) {
+            maxDistance = distance;
+            restTimer = 0;
+        } else {
+            restTimer += time;
+        }
+
+        if (restTimer * 1000 >= restMilliseconds) {
+            return true;
+        }
+
+        return false;
     }
 
     public float getDistance() {
-        // TODO getDistance
+        float distance = 0;
 
-        return RandUtil.random(0f, 100f);
+        for (Body body : bodies) {
+            distance += body.getPosition().x;
+        }
+
+        distance /= bodies.size();
+
+        return distance;
     }
 
 }

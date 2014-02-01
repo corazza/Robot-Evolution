@@ -18,6 +18,7 @@ public class Configuration {
     public int windowWidth;
     public int windowHeight;
     public float gravity;
+    public float timeStep;
 
     public Configuration() {
         applyProperties(getDefaultProperties());
@@ -43,6 +44,8 @@ public class Configuration {
         windowHeight = Integer.parseInt(p.getProperty("windowHeight", "512"));
 
         gravity = Float.parseFloat(p.getProperty("gravity", "10"));
+
+        timeStep = Float.parseFloat(p.getProperty("timeStep", "0.01"));
     }
 
     private static Properties getDefaultProperties() {

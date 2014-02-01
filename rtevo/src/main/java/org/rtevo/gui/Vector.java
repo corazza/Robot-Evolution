@@ -5,7 +5,7 @@ public class Vector {
     public int y;
 
     public Vector() {
-
+        this(0, 0);
     }
 
     public Vector(int x, int y) {

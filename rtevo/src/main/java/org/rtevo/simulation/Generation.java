@@ -63,12 +63,28 @@ public class Generation {
     private int numSimulations;
     private List<Chromosome> chromosomes;
     private List<Result> results = new ArrayList<Result>();
-
-    // configuration cache
-    private int robotMilliseconds;
-    private float gravity;
     private List<Simulation> simulations;
     private List<Future<List<Result>>> futureSimulationResults = new ArrayList<Future<List<Result>>>();
+
+    // configuration cache
+    private static float gravity;
+    private static float timeStep;
+
+    public static float getGravity() {
+        return gravity;
+    }
+
+    public static void setGravity(float gravity) {
+        Generation.gravity = gravity;
+    }
+
+    public static float getTimeStep() {
+        return timeStep;
+    }
+
+    public static void setTimeStep(float timeStep) {
+        Generation.timeStep = timeStep;
+    }
 
     /**
      * Generation from a list of chromosomes
@@ -76,11 +92,8 @@ public class Generation {
      * @param robotMilliseconds
      * @param chromosomes
      */
-    public Generation(int robotMilliseconds, List<Chromosome> chromosomes,
-            float gravity) {
+    public Generation(List<Chromosome> chromosomes) {
         this.chromosomes = chromosomes;
-        this.robotMilliseconds = robotMilliseconds;
-        this.gravity = gravity;
     }
 
     /**
@@ -89,9 +102,8 @@ public class Generation {
      * @param robotMilliseconds
      * @param numChromosomes
      */
-    public Generation(int robotMilliseconds, int numChromosomes, float gravity) {
-        this(robotMilliseconds, ChromosomeFactory.random(numChromosomes),
-                gravity);
+    public Generation(int numChromosomes) {
+        this(ChromosomeFactory.random(numChromosomes));
     }
 
     /**
@@ -114,7 +126,7 @@ public class Generation {
      * 
      * @return the next (evolved) generation
      */
-    public Generation nextGeneration() {
+    public Generation evolve() {
         for (Future<List<Result>> futureSimulationResult : futureSimulationResults) {
             if (!futureSimulationResult.isDone()) {
                 throw new IllegalStateException(
@@ -134,8 +146,7 @@ public class Generation {
                     "Not all simulations have finished.");
         }
 
-        return new Generation(robotMilliseconds,
-                ChromosomeFactory.evolve(results), gravity);
+        return new Generation(ChromosomeFactory.evolve(results));
     }
 
     /**
@@ -149,7 +160,7 @@ public class Generation {
         List<Chromosome> bestChromosomes = new ArrayList<Chromosome>();
         bestChromosomes.add(chromosomes.get(0));
 
-        return new Simulation(bestChromosomes, robotMilliseconds, gravity);
+        return new Simulation(bestChromosomes, gravity, timeStep);
     }
 
     /**
@@ -178,7 +189,7 @@ public class Generation {
             List<Chromosome> taken = new ArrayList<Chromosome>(
                     chromosomes.subList(i * robotsPerSimulation, i
                             * robotsPerSimulation + robotsPerSimulation));
-            simulations.add(new Simulation(taken, robotMilliseconds, gravity));
+            simulations.add(new Simulation(taken, gravity, timeStep));
         }
 
         int robotsLeft = numChromosomes % numSimulations;
@@ -235,14 +246,6 @@ public class Generation {
 
     public void setResults(ArrayList<Result> results) {
         this.results = results;
-    }
-
-    public int getRobotMilliseconds() {
-        return robotMilliseconds;
-    }
-
-    public void setRobotMilliseconds(int robotMilliseconds) {
-        this.robotMilliseconds = robotMilliseconds;
     }
 
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -15,10 +15,8 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.rtevo.genetics.Chromosome;
-import org.rtevo.util.RandUtil;
 
 /**
  * Evaluates chromosomes. Encapsulates and represents a simulation.
@@ -26,182 +24,196 @@ import org.rtevo.util.RandUtil;
  * @author Jan Corazza
  */
 public class Simulation implements Callable<List<Result>> {
-	// robots that are all in this same simulation
-	private List<Chromosome> chromosomes;
+    // robots have a time limit
+    private boolean expire = true;
 
-	// array of results for each chromosome
-	private List<Result> results = new ArrayList<Result>();
+    private List<Chromosome> chromosomes;
+    private List<Result> results = new ArrayList<Result>();
+    private ArrayList<Robot> robots = new ArrayList<Robot>();
 
-	private ArrayList<Robot> robots = new ArrayList<Robot>();
+    // simulation
+    private float timeStep;
 
-	// simulation:
-	private float timeStep = 0.01f; // in seconds
-	private int robotMilliseconds;
+    private int velocityIterations = 6;
+    private int positionIterations = 2;
+    private int groundLength = 1000; // in meters
 
-	private int velocityIterations = 6;
-	private int positionIterations = 2;
+    private float gravity;
+    private World world;
 
-	private float gravity;
-	private boolean doSleep = true;
-	private World world;
+    /**
+     * 
+     * 
+     * @param chromosomes
+     *            list of all the chromosomes that should be evaluated by this
+     *            simulation
+     */
+    public Simulation(List<Chromosome> chromosomes, float gravity,
+            float timeStep) {
+        if (chromosomes.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "There must be more than 0 chromosomes in the simulation.");
+        }
 
-	// temporary
-	float counter = 0;
+        this.chromosomes = chromosomes;
+        this.gravity = gravity;
+        this.timeStep = timeStep;
+    }
 
-	/**
-	 * 
-	 * 
-	 * @param chromosomes
-	 *            list of all the chromosomes that should be evaluated by this
-	 *            simulation
-	 */
-	public Simulation(List<Chromosome> chromosomes, int robotMilliseconds,
-			float gravity) {
-		if (chromosomes.isEmpty()) {
-			throw new IllegalArgumentException(
-					"There must be more than 0 chromosomes in the simulation.");
-		}
+    // MEMO - FOR THREADS - the current implementation is not optimal because if
+    // the user wants
+    // to render it he has to simulate it in his own thread himself because of
+    // data sharing. Solution: Monitor object that has synchronized methods for
+    // reading and writing what has to be rendered - PROBLEM: the r/w is
+    // synchronized, but the actual objects in it might not be - THEY PROBABLY
+    // ARE, but ask SO. They WILL BE if using BlockingQueue. Currently
+    // unimportant.
 
-		this.chromosomes = chromosomes;
-		this.robotMilliseconds = robotMilliseconds;
-		this.gravity = gravity;
-	}
+    private void setGround() {
+        BodyDef bd = new BodyDef();
+        bd.position.set(Math.max(-groundLength / 2, -10), 0f);
+        bd.type = BodyType.STATIC;
 
-	// MEMO - FOR THREADS - the current implementation is not optimal because if
-	// the user wants
-	// to render it he has to simulate it in his own thread himself because of
-	// data sharing. Solution: Monitor object that has synchronized methods for
-	// reading and writing what has to be rendered - PROBLEM: the r/w is
-	// synchronized, but the actual objects in it might not be - THEY PROBABLY
-	// ARE, but ask SO. They WILL BE if using BlockingQueue. Currently
-	// unimportant.
+        // add chain segments to the ground
+        ChainShape shape = new ChainShape();
 
-	// TODO implement proper (chain) ground
-	private void setGround() {
-		// body definition
-		BodyDef bd = new BodyDef();
-		bd.position.set(0f, 0f);
-		bd.type = BodyType.STATIC;
+        ArrayList<Vec2> groundVertices = new ArrayList<Vec2>();
 
-		// define shape of the body.
-		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(5f, 0.5f);
+        for (int i = 0; i < groundLength / 5; ++i) {
+            Vec2 segment = new Vec2((float) 5 * i, 0f);
+            groundVertices.add(segment);
+        }
 
-		// define fixture of the body.
-		FixtureDef fd = new FixtureDef();
-		fd.shape = shape;
-		Filter filter = new Filter();
-		filter.groupIndex = 1;
-		fd.filter = filter;
-		fd.friction = 0.3f;
-		fd.restitution = 0.5f;
+        Vec2[] spec = {};
 
-		// create the body and add fixture to it
-		Body body = world.createBody(bd);
-		body.createFixture(fd);
-		body.setUserData(new GroundUserData());
-	}
+        shape.createChain(groundVertices.toArray(spec), groundVertices.size());
 
-	private void setRobots() {
-		for (Chromosome chromosome : chromosomes) {
-			robots.add(new Robot(chromosome, world));
-		}
-	}
+        FixtureDef fd = new FixtureDef();
+        fd.shape = shape;
+        Filter filter = new Filter();
+        filter.groupIndex = 1;
+        fd.filter = filter;
+        fd.friction = 0.3f;
+        fd.restitution = 0.5f;
 
-	/**
-	 * Generate physics objects and add them to the JBox2D world.
-	 */
-	public void setup() {
-		Vec2 gravityVec2 = new Vec2(0f, gravity);
-		world = new World(gravityVec2);
-		world.setAllowSleep(doSleep);
+        // create the body and add fixture to it
+        Body body = world.createBody(bd);
+        body.createFixture(fd);
+        body.setUserData(new GroundUserData());
+    }
 
-		setGround();
-		setRobots();
-	}
+    private void setRobots() {
+        for (Chromosome chromosome : chromosomes) {
+            robots.add(new Robot(chromosome, world));
+        }
+    }
 
-	/**
-	 * Advances the simulation.
-	 */
-	// MEMO check if this is compatible with JBox2D (the approach of using +int
-	// milliseconds to advance the simulation)
-	public synchronized void update() {
-		world.step(timeStep, velocityIterations, positionIterations);
+    /**
+     * Generate physics objects and add them to the JBox2D world.
+     */
+    public void setup() {
+        Vec2 gravityVec2 = new Vec2(0f, gravity);
+        world = new World(gravityVec2);
+        world.setAllowSleep(true);
 
-		for (RevoluteJoint joint = (RevoluteJoint) world.getJointList(); joint != null; joint = (RevoluteJoint) joint
-				.getNext()) {
-			if (joint.getJointAngle() <= joint.getLowerLimit()
-					|| joint.getJointAngle() >= joint.getUpperLimit()) {
-				joint.setMotorSpeed(-joint.getMotorSpeed());
-			}
-		}
-	}
+        setGround();
+        setRobots();
+    }
 
-	/**
-	 * Searches for failed chromosomes and removes them from the simulation
-	 */
-	public synchronized void removeFinished() {
-		// TODO remove finished
+    /**
+     * Advances the simulation.
+     */
+    // MEMO check if this is compatible with JBox2D (the approach of using +int
+    // milliseconds to advance the simulation)
+    public synchronized void update() {
+        world.step(timeStep, velocityIterations, positionIterations);
 
-		counter += timeStep;
+        for (RevoluteJoint joint = (RevoluteJoint) world.getJointList(); joint != null; joint = (RevoluteJoint) joint
+                .getNext()) {
+            if (joint.getJointAngle() <= joint.getLowerLimit()
+                    || joint.getJointAngle() >= joint.getUpperLimit()) {
+                joint.setMotorSpeed(-joint.getMotorSpeed());
+            }
+        }
+    }
 
-		if (counter * 1000 > robotMilliseconds) {
-			Chromosome finished = chromosomes.remove(0);
-			Result finishedResult = new Result(finished,
-					RandUtil.random(0, 100));
-			results.add(finishedResult);
+    /**
+     * Searches for failed chromosomes and removes them from the simulation
+     */
+    public synchronized void removeFinished() {
+        if (!expire) {
+            return;
+        }
 
-			counter = 0;
-		}
-	}
+        ArrayList<Robot> robotsToRemove = new ArrayList<Robot>();
+        ArrayList<Chromosome> chromosomesToRemove = new ArrayList<Chromosome>();
 
-	public List<Result> simulate() {
-		setup();
+        for (Robot robot : robots) {
+            if (robot.isDone(timeStep)) {
+                results.add(robot.removeFromWorld());
+                robotsToRemove.add(robot);
+                chromosomesToRemove.add(robot.getChromosome());
+            }
+        }
 
-		while (!chromosomes.isEmpty()) {
-			update();
-			// TODO flag to avoid unnecessary call
-			removeFinished();
-		}
+        robots.removeAll(robotsToRemove);
+        chromosomes.removeAll(chromosomesToRemove);
+    }
 
-		return results;
-	}
+    public List<Result> simulate() {
+        setup();
 
-	public synchronized World getWorld() {
-		return world;
-	}
+        while (!robots.isEmpty()) {
+            update();
+            removeFinished();
+        }
 
-	public void addChromosome(Chromosome toAdd) {
-		chromosomes.add(toAdd);
-	}
+        return results;
+    }
 
-	@Override
-	public List<Result> call() {
-		return simulate();
-	}
+    @Override
+    public List<Result> call() {
+        return simulate();
+    }
 
-	public List<Chromosome> getChromosomes() {
-		return chromosomes;
-	}
+    public boolean isExpire() {
+        return expire;
+    }
 
-	public List<Result> getResults() {
-		return results;
-	}
+    public void setExpire(boolean expire) {
+        this.expire = expire;
+    }
 
-	public void setTimeStep(float timeStep) {
-		this.timeStep = timeStep;
-	}
+    public synchronized World getWorld() {
+        return world;
+    }
 
-	public float getTimeStep() {
-		return timeStep;
-	}
+    public void addChromosome(Chromosome toAdd) {
+        chromosomes.add(toAdd);
+    }
 
-	public float getGravity() {
-		return gravity;
-	}
+    public List<Chromosome> getChromosomes() {
+        return chromosomes;
+    }
 
-	public void setGravity(float gravity) {
-		this.gravity = gravity;
-	}
+    public List<Result> getResults() {
+        return results;
+    }
+
+    public void setTimeStep(float timeStep) {
+        this.timeStep = timeStep;
+    }
+
+    public float getTimeStep() {
+        return timeStep;
+    }
+
+    public float getGravity() {
+        return gravity;
+    }
+
+    public void setGravity(float gravity) {
+        this.gravity = gravity;
+    }
 
 }
