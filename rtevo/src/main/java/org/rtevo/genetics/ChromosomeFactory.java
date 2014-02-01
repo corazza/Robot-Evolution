@@ -85,57 +85,80 @@ public class ChromosomeFactory {
     public static Chromosome mutate(Chromosome chromosome) {
         //making new chromosome which will be mutated
     	Chromosome mutated = new Chromosome();
-        for( PartJoint i : chromosome.partJoints ) { 
-        	PartJoint partJ = i;
-        	mutated.partJoints.add(partJ);
+    	
+    	for( PartJoint i : chromosome.partJoints ) { 
+
+        	PartJoint toMutateJ = new PartJoint();
+        	
+        	toMutateJ.rotateFrom = i.rotateFrom;
+        	toMutateJ.rotateTo = i.rotateTo;
+        	toMutateJ.angularVelocity = i.angularVelocity;
+        	toMutateJ.percentOne = i.percentOne;
+        	toMutateJ.percentTwo = i.percentTwo;
+        	mutated.partJoints.add(toMutateJ);
         }
-        
+       
         for( Part i: chromosome.parts) {
-        	Part part = i;
-        	mutated.parts.add(part);
+
+        	Part toMutateP = new Part();
+        	
+        	toMutateP.width = i.width;
+        	toMutateP.height = i.height;
+        	mutated.parts.add(toMutateP);
         }
         
         //iterating through partJoints arraylist
         for( PartJoint i : mutated.partJoints ) {
-        	 //randomization genes
-        	 float rotateFromToMutate = RandUtil.random(-0.05f, 0.05f);
-        	 float rotateToToMutate = RandUtil.random(-0.05f, 0.05f);
-        	 float angularVelocityToMutate = RandUtil.random(-0.05f, 0.05f);
-        	 float percentOneToMutate = RandUtil.random(-0.05f, 0.05f);
-        	 float percentTwoToMutate = RandUtil.random(-0.05f, 0.05f);
-        	 
-        	 //contition of mutation
-        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		
+        	
+        	//mutating rotateFrom
+        	if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		float rotateFromToMutate = RandUtil.random(-0.05f, 0.05f);
         		if( i.rotateFrom + rotateFromToMutate > 0 ) { i.rotateFrom += rotateFromToMutate;  }
+        	 }
+        	 //mutating rotateTo
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		float rotateToToMutate = RandUtil.random(-0.05f, 0.05f);
         		if( i.rotateTo + rotateToToMutate > 0 ) { i.rotateTo += rotateToToMutate;  }
+        	 }
+        	 //mutating percentOne
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		float percentOneToMutate = RandUtil.random(-0.05f, 0.05f);
         		if( i.percentOne + percentOneToMutate > 0 && i.percentOne + percentOneToMutate < 1 ) { 
         			i.percentOne += percentOneToMutate; 
         		}
+        	 }
+        	 //mutating percentTwo
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {	
+        		float percentTwoToMutate = RandUtil.random(-0.05f, 0.05f);
         		if( i.percentTwo + percentTwoToMutate > 0 && i.percentTwo + percentTwoToMutate < 1 ) { 
         			i.percentTwo += percentTwoToMutate; 
         		}
-        		
-        		i.angularVelocity += angularVelocityToMutate;
-        		
-        		}
-        	}
-        
-        for ( Part i : mutated.parts ) {
-        	
-        	float widthToMutate = RandUtil.random(-0.02f, 0.02f);
-        	float heightToMutate = RandUtil.random(-0.02f, 0.02f);
-        	
-        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		 if( i.width + widthToMutate < 2f && i.width + widthToMutate > 0.5f ) {
-        			 i.width += widthToMutate;
-        		 }
-        		 if( i.height + heightToMutate < 2f && i.height + heightToMutate > 0.5f ) {
-        			 i.height += heightToMutate;
-        		 }
         	 }
+        	 //mutating angularVelocity
+        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		float angularVelocityToMutate = RandUtil.random(-0.05f, 0.05f);
+        			i.angularVelocity += angularVelocityToMutate;
+        	 }
+        }
+        		
         	
+         for ( Part i : mutated.parts ) {
         	
+        	  // mutating width
+        	  if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		  float widthToMutate = RandUtil.random(-0.02f, 0.02f);
+        		  if( i.width + widthToMutate < 2f && i.width + widthToMutate > 0.5f ) {
+        			 i.width += widthToMutate;
+        		  }
+        	  }
+        	  //mutating height
+        	  if( RandUtil.random(0f, 1f) < 0.2f ) {
+        		  float heightToMutate = RandUtil.random(-0.02f, 0.02f);
+        		  if( i.height + heightToMutate < 2f && i.height + heightToMutate > 0.5f ) {
+        			  i.height += heightToMutate;
+        		 }
+        	}
+        	 
         }
         
         return mutated;
