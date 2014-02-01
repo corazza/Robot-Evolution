@@ -89,12 +89,21 @@ public class ChromosomeFactory {
     	for( PartJoint i : chromosome.partJoints ) { 
 
         	PartJoint toMutateJ = new PartJoint();
+        	Part toMutateOneP = new Part();
+        	Part toMutateTwoP = new Part();
         	
         	toMutateJ.rotateFrom = i.rotateFrom;
         	toMutateJ.rotateTo = i.rotateTo;
         	toMutateJ.angularVelocity = i.angularVelocity;
         	toMutateJ.percentOne = i.percentOne;
         	toMutateJ.percentTwo = i.percentTwo;
+        	toMutateOneP.height = i.partOne.height;
+        	toMutateOneP.width = i.partOne.width;
+        	toMutateTwoP.height = i.partTwo.height;
+        	toMutateTwoP.width = i.partTwo.width;
+        	
+        	mutated.parts.add(toMutateOneP);
+        	mutated.parts.add(toMutateTwoP);
         	mutated.partJoints.add(toMutateJ);
         }
        
