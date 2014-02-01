@@ -85,14 +85,13 @@ public class ChromosomeFactory {
     public static Chromosome mutate(Chromosome chromosome) {
         //making new chromosome which will be mutated
     	Chromosome mutated = new Chromosome();
+    	
         for( PartJoint i : chromosome.partJoints ) { 
-        	PartJoint partJ = i;
-        	mutated.partJoints.add(partJ);
+        	mutated.partJoints.add(i);
         }
         
         for( Part i: chromosome.parts) {
-        	Part part = i;
-        	mutated.parts.add(part);
+        	mutated.parts.add(i);
         }
         
         //iterating through partJoints arraylist
