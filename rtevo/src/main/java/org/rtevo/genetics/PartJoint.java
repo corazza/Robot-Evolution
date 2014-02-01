@@ -50,8 +50,8 @@ public class PartJoint {
     @Override
     public String toString() {
         return "Joint [rotateFrom=" + rotateFrom + ", rotateTo=" + rotateTo
-                + ", angularVelocity=" + angularVelocity + ", shapeOne="
-                + partOne + ", shapeTwo=" + partTwo + ", percentOne="
+                + ", angularVelocity=" + angularVelocity + ", partOne="
+                + partOne + ", partTwo=" + partTwo + ", percentOne="
                 + percentOne + ", percentTwo=" + percentTwo + "]";
     }
 

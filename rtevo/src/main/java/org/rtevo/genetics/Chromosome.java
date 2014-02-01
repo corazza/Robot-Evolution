@@ -13,7 +13,7 @@ import org.rtevo.util.RandUtil;
  */
 public class Chromosome {
     private static final int minShapes = 2;
-    private static final int maxShapes = 50;
+    private static final int maxShapes = 20;
 
     public ArrayList<PartJoint> partJoints = new ArrayList<PartJoint>();
     public ArrayList<Part> parts = new ArrayList<Part>();

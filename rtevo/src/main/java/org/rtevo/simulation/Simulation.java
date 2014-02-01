@@ -171,7 +171,6 @@ public class Simulation implements Callable<List<Result>> {
         return results;
     }
 
-    @Override
     public List<Result> call() {
         return simulate();
     }
@@ -214,6 +213,10 @@ public class Simulation implements Callable<List<Result>> {
 
     public void setGravity(float gravity) {
         this.gravity = gravity;
+    }
+
+    public ArrayList<Robot> getRobots() {
+        return robots;
     }
 
 }

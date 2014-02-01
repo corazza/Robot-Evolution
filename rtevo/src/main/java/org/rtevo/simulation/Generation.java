@@ -23,7 +23,7 @@ class OpJobThreadFactory implements ThreadFactory {
     private final AtomicInteger threadNumber = new AtomicInteger(1);
 
     public OpJobThreadFactory(int priority) {
-        this(priority, true);
+        this(priority, false);
     }
 
     public OpJobThreadFactory(int priority, boolean daemon) {
@@ -32,7 +32,6 @@ class OpJobThreadFactory implements ThreadFactory {
         namePrefix = "jobpool-" + poolNumber.getAndIncrement() + "-thread-";
     }
 
-    @Override
     public Thread newThread(Runnable r) {
         Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
         t.setDaemon(daemon);
@@ -56,8 +55,8 @@ public class Generation {
                 parallelSimulations, 100L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>());
 
-        workerPool
-                .setThreadFactory(new OpJobThreadFactory(Thread.MAX_PRIORITY));
+        workerPool.setThreadFactory(new OpJobThreadFactory(Thread.MAX_PRIORITY,
+                false));
     }
 
     private int numSimulations;
@@ -156,11 +155,14 @@ public class Generation {
      * @return
      */
     public Simulation getSample() {
-        // TODO check if chromosomes.get(0) is indeed the best one
         List<Chromosome> bestChromosomes = new ArrayList<Chromosome>();
         bestChromosomes.add(chromosomes.get(0));
 
         return new Simulation(bestChromosomes, gravity, timeStep);
+    }
+
+    public Chromosome getBestChromosome() {
+        return chromosomes.get(0);
     }
 
     /**

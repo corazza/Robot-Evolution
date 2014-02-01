@@ -12,6 +12,7 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
+import org.rtevo.common.Vector;
 import org.rtevo.genetics.Chromosome;
 import org.rtevo.genetics.Part;
 import org.rtevo.genetics.PartJoint;
@@ -33,14 +34,14 @@ public class Robot {
 
     public static void setRobotMilliseconds(long robotMilliseconds) {
         Robot.robotMilliseconds = robotMilliseconds;
-        Robot.restMilliseconds = robotMilliseconds/2;
+        Robot.restMilliseconds = robotMilliseconds / 2;
     }
 
     public Robot(Chromosome chromosome, World world) {
         // TODO correctly position the parts and angles
         this.world = world;
         this.chromosome = chromosome;
-        
+
         for (PartJoint partJoint : chromosome.partJoints) {
             // if the bodies for the two parts haven't already been generated
             if (!partToBody.containsKey(partJoint.partOne)) {
@@ -106,7 +107,8 @@ public class Robot {
         jointDef.lowerAngle = GeomUtil.circle(partJoint.rotateFrom);
         jointDef.upperAngle = GeomUtil.circle(partJoint.rotateTo);
         jointDef.enableLimit = true;
-        jointDef.maxMotorTorque = 10.0f; // TODO limit maximum torque
+        jointDef.maxMotorTorque = 10.0f; // TODO limit maximum torque for all
+                                         // joints
         jointDef.motorSpeed = GeomUtil.circle(partJoint.angularVelocity);
         jointDef.enableMotor = true;
 
@@ -153,15 +155,21 @@ public class Robot {
     }
 
     public float getDistance() {
-        float distance = 0;
+        return getPosition().x;
+    }
+
+    public Vector<Float> getPosition() {
+        Vector<Float> position = new Vector<Float>(0f, 0f);
 
         for (Body body : bodies) {
-            distance += body.getPosition().x;
+            position.x += body.getPosition().x;
+            position.y += body.getPosition().y;
         }
 
-        distance /= bodies.size();
+        position.x /= bodies.size();
+        position.y /= bodies.size();
 
-        return distance;
+        return position;
     }
 
 }

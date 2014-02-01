@@ -18,7 +18,6 @@ public class Result implements Comparable<Result> {
         this.metersPassed = metersPassed;
     }
 
-    @Override
     public int compareTo(Result other) {
         double difference = metersPassed - other.metersPassed;
 
