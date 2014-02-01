@@ -106,16 +106,7 @@ public class ChromosomeFactory {
         	mutated.parts.add(toMutateTwoP);
         	mutated.partJoints.add(toMutateJ);
         }
-       
-        for( Part i: chromosome.parts) {
-
-        	Part toMutateP = new Part();
-        	
-        	toMutateP.width = i.width;
-        	toMutateP.height = i.height;
-        	mutated.parts.add(toMutateP);
-        }
-        
+      
         //iterating through partJoints arraylist
         for( PartJoint i : mutated.partJoints ) {
         	
