@@ -21,13 +21,18 @@ public class Result implements Comparable<Result> {
     public int compareTo(Result other) {
         double difference = metersPassed - other.metersPassed;
 
-        if (difference > 0) {
+        if (difference < 0) {
             return 1;
-        } else if (difference < 0) {
+        } else if (difference > 0) {
             return -1;
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public String toString() {
+        return metersPassed + "";
     }
 
 }

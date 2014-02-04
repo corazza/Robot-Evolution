@@ -142,9 +142,7 @@ public class RobotEvolution {
                 // computation is being done in the backend
                 while (!generation.isDone()
                         || started + wait > System.currentTimeMillis()) {
-
                     presentationSimulation.update();
-                    presentationSimulation.removeFinished();
                     window.updateDisplay();
 
                     try {

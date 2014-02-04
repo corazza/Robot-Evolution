@@ -48,6 +48,8 @@ public class Generation {
     private static ThreadPoolExecutor workerPool;
     private static int parallelSimulations;
 
+    public static volatile int generationNumber = 0;
+
     public static void configureWorkerPool(int parallelSimulations) {
         Generation.parallelSimulations = parallelSimulations;
 
@@ -93,6 +95,7 @@ public class Generation {
      */
     public Generation(List<Chromosome> chromosomes) {
         this.chromosomes = chromosomes;
+        ++generationNumber;
     }
 
     /**
@@ -166,15 +169,12 @@ public class Generation {
     }
 
     /**
-     * Creates a number simulations out of an array of chromosomes.
+     * Divides all robots into a number of simulations that have to be computed
+     * in order to advance to the next generation.
      * 
-     * @param allChromosomes
-     *            array of chromosomes to be spread across several simulations
-     * @param chromosomesPerSimulation
-     *            how many chromosomes should be included in one simulation,
-     *            last simulation will have allChromosomes.size() %
-     *            chromosomesPerSimulation chromosomes less
-     * @return
+     * @param numSimulations
+     *            the number of simulations to divide the chromosomes in
+     * @return an array of simulations to compute
      */
     public ArrayList<Simulation> getSimulations(int numSimulations) {
         int numChromosomes = chromosomes.size();

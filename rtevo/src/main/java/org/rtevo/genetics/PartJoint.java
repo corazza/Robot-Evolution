@@ -10,17 +10,31 @@ import org.rtevo.util.RandUtil;
  * 
  */
 public class PartJoint {
+    public static final float minAngularVelocity = -1f;
+    public static final float maxAngularVelocity = 1f;
+    
     public float rotateFrom;
     public float rotateTo;
     public float angularVelocity;
 
-    public Part partOne;
-    public Part partTwo;
-
     public float percentOne;
     public float percentTwo;
 
+    public Part partOne;
+    public Part partTwo;
+
     public PartJoint() {
+    }
+
+    public PartJoint(PartJoint copy) {
+        rotateFrom = copy.rotateFrom;
+        rotateTo = copy.rotateTo;
+        angularVelocity = copy.angularVelocity;
+        percentOne = copy.percentOne;
+        percentTwo = copy.percentTwo;
+
+        partOne = new Part(copy.partOne);
+        partTwo = new Part(copy.partTwo);
     }
 
     public PartJoint(Part partOne, Part partTwo) {

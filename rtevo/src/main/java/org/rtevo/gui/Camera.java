@@ -48,6 +48,14 @@ public class Camera {
         return point;
     }
 
+    public float translateRelative(float a) {
+        return (float) (a * zoom);
+    }
+
+    public int translateRelative(int a) {
+        return (int) (a * zoom);
+    }
+
     public void startDragging(int x, int y) {
         lastDrag = new Vector<Integer>(x, y);
     }

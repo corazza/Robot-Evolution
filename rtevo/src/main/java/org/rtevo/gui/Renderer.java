@@ -28,6 +28,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.rtevo.common.Vector;
+import org.rtevo.simulation.Generation;
 import org.rtevo.simulation.PartUserData;
 import org.rtevo.simulation.Robot;
 import org.rtevo.simulation.Simulation;
@@ -218,14 +219,18 @@ class Renderer extends JPanel implements ActionListener {
                 .getPosition());
         Vector<Integer> origin = camera.translate(new Vec2(0, 0));
 
+        FontMetrics fontMetrics = currentGraphics.getFontMetrics();
+        int infoOffset = 0;
+
         float seconds = (System.currentTimeMillis() - startMillis) / 1000f;
 
         String timeString = "Time: " + String.format("%.1f", seconds) + "s";
+        String generationString = "Generation #" + Generation.generationNumber;
 
-        FontMetrics fontMetrics = currentGraphics.getFontMetrics();
-
-        currentGraphics
-                .drawString(timeString, 10, fontMetrics.getHeight() + 10);
+        currentGraphics.drawString(timeString, 10, fontMetrics.getHeight()
+                + infoOffset);
+        currentGraphics.drawString(generationString, 10,
+                fontMetrics.getHeight() * 2 + infoOffset);
 
         currentGraphics.setFont(robotFont);
         fontMetrics = currentGraphics.getFontMetrics();
@@ -250,7 +255,7 @@ class Renderer extends JPanel implements ActionListener {
         Vector<Integer> from = camera.translate(new Vec2(2, 0));
         Vector<Integer> to = camera.translate(new Vec2(3, 0));
         int offset = 50;
-        int height = 10;
+        int height = camera.translateRelative(10);
 
         Line2D legend = new Line2D.Float(from.x, groundPosition.y + offset,
                 to.x, groundPosition.y + offset);

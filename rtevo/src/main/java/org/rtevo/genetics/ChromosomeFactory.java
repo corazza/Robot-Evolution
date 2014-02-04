@@ -29,6 +29,8 @@ public class ChromosomeFactory {
         return chromosomes;
     }
 
+    // FIXME new evolve function, think about this, after completing the mutate
+    // function
     public static List<Chromosome> evolve(List<Result> results) {
         // 1. sort the array based on metersPassed
         // 2. remove the below ChromosomeFactory.cutoff percent
@@ -44,6 +46,8 @@ public class ChromosomeFactory {
         // best results first
         Collections.sort(myResults);
 
+        System.out.println(myResults);
+
         // remove the worst cutoff percent
         if (originalSize > remove) {
             // no need to copy since no modification is done
@@ -53,7 +57,7 @@ public class ChromosomeFactory {
         List<Chromosome> chromosomes = new ArrayList<Chromosome>();
 
         for (Result result : myResults) {
-            chromosomes.add(result.chromosome);
+            chromosomes.add(result.chromosome.mutate());
         }
 
         while (chromosomes.size() != originalSize) {
@@ -67,106 +71,17 @@ public class ChromosomeFactory {
             List<Result> toAdd = myResults.subList(0, outreach);
 
             for (Result result : toAdd) {
-                chromosomes.add(mutate(result.chromosome));
+                chromosomes.add(result.chromosome.mutate());
             }
         }
 
         return chromosomes;
     }
 
-    /**
-     * Returns a mutated chromosome.
-     * 
-     * @param chromosome
-     *            Chromosome object to mutate
-     * @return new Chromosome object that has been mutated from 1st parameter
-     */
+    public static Chromosome crossover(Chromosome chromofirst,
+            Chromosome chromosecond) {
 
-    public static Chromosome mutate(Chromosome chromosome) {
-        //making new chromosome which will be mutated
-    	Chromosome mutated = new Chromosome();
-    	
-    	for( PartJoint i : chromosome.partJoints ) { 
-
-        	PartJoint toMutateJ = new PartJoint();
-        	Part toMutateOneP = new Part();
-        	Part toMutateTwoP = new Part();
-        	
-        	toMutateJ.rotateFrom = i.rotateFrom;
-        	toMutateJ.rotateTo = i.rotateTo;
-        	toMutateJ.angularVelocity = i.angularVelocity;
-        	toMutateJ.percentOne = i.percentOne;
-        	toMutateJ.percentTwo = i.percentTwo;
-        	toMutateOneP.height = i.partOne.height;
-        	toMutateOneP.width = i.partOne.width;
-        	toMutateTwoP.height = i.partTwo.height;
-        	toMutateTwoP.width = i.partTwo.width;
-        	
-        	mutated.parts.add(toMutateOneP);
-        	mutated.parts.add(toMutateTwoP);
-        	mutated.partJoints.add(toMutateJ);
-        }
-      
-        //iterating through partJoints arraylist
-        for( PartJoint i : mutated.partJoints ) {
-        	
-        	//mutating rotateFrom
-        	if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		float rotateFromToMutate = RandUtil.random(-0.05f, 0.05f);
-        		if( i.rotateFrom + rotateFromToMutate > 0 ) { i.rotateFrom += rotateFromToMutate;  }
-        	 }
-        	 //mutating rotateTo
-        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		float rotateToToMutate = RandUtil.random(-0.05f, 0.05f);
-        		if( i.rotateTo + rotateToToMutate > 0 ) { i.rotateTo += rotateToToMutate;  }
-        	 }
-        	 //mutating percentOne
-        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		float percentOneToMutate = RandUtil.random(-0.05f, 0.05f);
-        		if( i.percentOne + percentOneToMutate > 0 && i.percentOne + percentOneToMutate < 1 ) { 
-        			i.percentOne += percentOneToMutate; 
-        		}
-        	 }
-        	 //mutating percentTwo
-        	 if( RandUtil.random(0f, 1f) < 0.2f ) {	
-        		float percentTwoToMutate = RandUtil.random(-0.05f, 0.05f);
-        		if( i.percentTwo + percentTwoToMutate > 0 && i.percentTwo + percentTwoToMutate < 1 ) { 
-        			i.percentTwo += percentTwoToMutate; 
-        		}
-        	 }
-        	 //mutating angularVelocity
-        	 if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		float angularVelocityToMutate = RandUtil.random(-0.05f, 0.05f);
-        			i.angularVelocity += angularVelocityToMutate;
-        	 }
-        }
-        		
-        	
-         for ( Part i : mutated.parts ) {
-        	
-        	  // mutating width
-        	  if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		  float widthToMutate = RandUtil.random(-0.02f, 0.02f);
-        		  if( i.width + widthToMutate < 2f && i.width + widthToMutate > 0.5f ) {
-        			 i.width += widthToMutate;
-        		  }
-        	  }
-        	  //mutating height
-        	  if( RandUtil.random(0f, 1f) < 0.2f ) {
-        		  float heightToMutate = RandUtil.random(-0.02f, 0.02f);
-        		  if( i.height + heightToMutate < 2f && i.height + heightToMutate > 0.5f ) {
-        			  i.height += heightToMutate;
-        		 }
-        	}
-        	 
-        }
-        
-        return mutated;
+        return null;
     }
 
-    public static Chromosome crossover(Chromosome chromofirst, Chromosome chromosecond) {
-    	
-    	return null;
-    }
-   
 }
