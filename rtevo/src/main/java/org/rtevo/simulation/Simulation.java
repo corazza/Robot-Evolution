@@ -26,7 +26,6 @@ import org.rtevo.genetics.Chromosome;
 public class Simulation implements Callable<List<Result>> {
     // robots have a time limit
     private boolean expire = true;
-    private int generationNumber;
 
     private List<Chromosome> chromosomes;
     private List<Result> results = new ArrayList<Result>();
