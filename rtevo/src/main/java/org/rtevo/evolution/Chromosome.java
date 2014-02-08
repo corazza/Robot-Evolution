@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.rtevo.genetics;
+package org.rtevo.evolution;
 
 import java.util.ArrayList;
 import java.util.HashMap;

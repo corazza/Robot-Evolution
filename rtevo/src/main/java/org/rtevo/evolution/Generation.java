@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.rtevo.simulation;
+package org.rtevo.evolution;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.rtevo.genetics.Chromosome;
+import org.rtevo.simulation.Result;
+import org.rtevo.simulation.Simulation;
 import org.rtevo.util.RandUtil;
 
 public class Generation {
@@ -42,7 +43,7 @@ public class Generation {
     // configuration cache
     private static float gravity;
     private static float timeStep;
-    private final static double random = 0.05;
+    private final static double random = 0;
 
     public static float getGravity() {
         return gravity;

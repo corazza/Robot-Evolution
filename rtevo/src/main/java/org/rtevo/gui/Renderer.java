@@ -28,7 +28,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.rtevo.common.Vector;
-import org.rtevo.simulation.Generation;
+import org.rtevo.evolution.Generation;
 import org.rtevo.simulation.PartUserData;
 import org.rtevo.simulation.Robot;
 import org.rtevo.simulation.Simulation;

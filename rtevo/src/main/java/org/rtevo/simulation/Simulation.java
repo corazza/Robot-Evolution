@@ -16,7 +16,7 @@ import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
-import org.rtevo.genetics.Chromosome;
+import org.rtevo.evolution.Chromosome;
 
 /**
  * Evaluates chromosomes. Encapsulates and represents a simulation.

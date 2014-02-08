@@ -13,9 +13,9 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.rtevo.common.Vector;
-import org.rtevo.genetics.Chromosome;
-import org.rtevo.genetics.Part;
-import org.rtevo.genetics.PartJoint;
+import org.rtevo.evolution.Chromosome;
+import org.rtevo.evolution.Part;
+import org.rtevo.evolution.PartJoint;
 import org.rtevo.util.GeomUtil;
 
 public class Robot {

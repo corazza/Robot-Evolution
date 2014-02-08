@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.rtevo.common.Configuration;
-import org.rtevo.genetics.Chromosome;
-import org.rtevo.genetics.Part;
-import org.rtevo.genetics.PartJoint;
+import org.rtevo.evolution.Chromosome;
+import org.rtevo.evolution.Part;
+import org.rtevo.evolution.PartJoint;
 import org.rtevo.gui.Window;
-import org.rtevo.simulation.Generation;
+import org.rtevo.evolution.Generation;
 import org.rtevo.simulation.Result;
 import org.rtevo.simulation.Robot;
 import org.rtevo.simulation.Simulation;

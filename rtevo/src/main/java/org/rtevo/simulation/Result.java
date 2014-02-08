@@ -3,7 +3,7 @@
  */
 package org.rtevo.simulation;
 
-import org.rtevo.genetics.Chromosome;
+import org.rtevo.evolution.Chromosome;
 
 /**
  * @author Jan Corazza
