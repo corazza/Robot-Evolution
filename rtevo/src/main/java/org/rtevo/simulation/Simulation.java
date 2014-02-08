@@ -60,15 +60,6 @@ public class Simulation implements Callable<List<Result>> {
         this.timeStep = timeStep;
     }
 
-    // MEMO - FOR THREADS - the current implementation is not optimal because if
-    // the user wants
-    // to render it he has to simulate it in his own thread himself because of
-    // data sharing. Solution: Monitor object that has synchronized methods for
-    // reading and writing what has to be rendered - PROBLEM: the r/w is
-    // synchronized, but the actual objects in it might not be - THEY PROBABLY
-    // ARE, but ask SO. They WILL BE if using BlockingQueue. Currently
-    // unimportant.
-
     private void setGround() {
         BodyDef bd = new BodyDef();
         bd.position.set(Math.max(-groundLength / 2, -10), 0f);
@@ -123,8 +114,6 @@ public class Simulation implements Callable<List<Result>> {
     /**
      * Advances the simulation.
      */
-    // MEMO check if this is compatible with JBox2D (the approach of using +int
-    // milliseconds to advance the simulation)
     public synchronized void update() {
         world.step(timeStep, velocityIterations, positionIterations);
 

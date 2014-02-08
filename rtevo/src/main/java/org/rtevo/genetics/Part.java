@@ -20,9 +20,10 @@ public class Part {
 
     private static int id = 10000;
 
+    public int idm = -1;
+    
     public float width;
     public float height;
-    public int idm = -1;
 
     // joints connected to this shape
     public ArrayList<PartJoint> partJoints = new ArrayList<PartJoint>();

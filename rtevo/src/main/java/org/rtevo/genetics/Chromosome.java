@@ -8,13 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.rtevo.util.GeomUtil;
 import org.rtevo.util.RandUtil;
 
-/**
- * Most fields are public for convenience.
- * 
- */
 public class Chromosome {
     private static final int minShapes = 2;
     private static final int maxParts = 20;
@@ -25,8 +20,6 @@ public class Chromosome {
     }
 
     public ArrayList<PartJoint> partJoints = new ArrayList<PartJoint>();
-
-    // public ArrayList<Part> parts = new ArrayList<Part>();
 
     /**
      * Default constructor
@@ -39,7 +32,7 @@ public class Chromosome {
      * Copy constructor
      * 
      * @param copy
-     *            - the chromosome to copy from
+     *            the chromosome to copy from
      */
     public Chromosome(Chromosome copy) {
         HashMap<Integer, Part> used = new HashMap<Integer, Part>();
@@ -69,7 +62,7 @@ public class Chromosome {
     /**
      * Represents a single mutation
      */
-    private float mutation(float from, float to) {
+    public static float mutation(float from, float to) {
         if (RandUtil.random(0f, 1f) < mutationChance) {
             return RandUtil.random(from, to);
         }
@@ -99,38 +92,11 @@ public class Chromosome {
         Chromosome mutated = new Chromosome(this);
 
         for (PartJoint partJoint : mutated.partJoints) {
-            float rotateFromToMutate = mutation(-0.05f, 0.05f);
-            float rotateToToMutate = mutation(-0.05f, 0.05f);
-            float percentOneToMutate = mutation(-5f, 5f);
-            float percentTwoToMutate = mutation(-5f, 5f);
-            float angularVelocityToMutate = mutation(-0.05f, 0.05f);
-
-            if (partJoint.rotateFrom + rotateFromToMutate >= 0
-                    && partJoint.rotateFrom + rotateFromToMutate <= GeomUtil
-                            .circle(1)) {
-                partJoint.rotateFrom += rotateFromToMutate;
-            }
-
-            if (partJoint.rotateTo + rotateToToMutate >= 0
-                    && partJoint.rotateTo + rotateToToMutate <= GeomUtil
-                            .circle(1)) {
-                partJoint.rotateTo += rotateToToMutate;
-            }
-
-            if (partJoint.percentOne + percentOneToMutate >= 0
-                    && partJoint.percentOne + percentOneToMutate <= 1) {
-                partJoint.percentOne += percentOneToMutate;
-            }
-
-            if (partJoint.percentTwo + percentTwoToMutate >= 0
-                    && partJoint.percentTwo + percentTwoToMutate <= 1) {
-                partJoint.percentTwo += percentTwoToMutate;
-            }
-
-            if (partJoint.angularVelocity + angularVelocityToMutate >= PartJoint.minAngularVelocity
-                    && partJoint.angularVelocity + angularVelocityToMutate <= PartJoint.maxAngularVelocity) {
-                partJoint.angularVelocity += angularVelocityToMutate;
-            }
+            partJoint.changeAngularVelocity(mutation(-0.05f, 0.05f));
+            partJoint.changePointA(mutation(-0.05f, 0.05f));
+            partJoint.changePointB(mutation(-0.05f, 0.05f));
+            partJoint.changePercentOne(mutation(-5f, 5f));
+            partJoint.changePercentTwo(mutation(-5f, 5f));
         }
 
         List<Part> partList = mutated.getPartList();
@@ -190,8 +156,6 @@ public class Chromosome {
         partJoints.remove(toRemove.partJoints.get(0));
     }
 
-    // TODO rotate to and rotate from must not be more than 0.5 appart
-    // TODO limit max torque, but increase base
     // TODO start with premade structure
     public static Chromosome random() {
         Chromosome chromosome = new Chromosome();

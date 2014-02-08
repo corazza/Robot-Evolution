@@ -22,15 +22,8 @@ import org.rtevo.simulation.Simulation;
 
 import com.google.gson.Gson;
 
-/* MEMO Weight is a property of all objects, joints and body have weights, make them
- * extend something, evolve this weight
- * 
- * Think about: no legs or anything like that, just random polygons with weight
- * and joints
- */
-
 /**
- * main application class
+ * Main application class
  * 
  */
 public class RobotEvolution {
@@ -54,8 +47,7 @@ public class RobotEvolution {
         Generation.configureWorkerPool(c.parallelSimulations);
         Generation.setGravity(c.gravity);
         Generation.setTimeStep(c.timeStep);
-        Generation.setPresentationChromosomesNumber(c.presentationChromosomes);
-        Robot.setRobotMilliseconds(c.robotMilliseconds);
+        Robot.setRobotMilliseconds(c.robotSeconds);
         Chromosome.setMutationChance(c.mutationChance);
 
         if (!c.load.equals("false")) {
@@ -125,7 +117,7 @@ public class RobotEvolution {
             return generations == c.generations;
         }
 
-        return bestResult.score / (c.robotMilliseconds * 1000) == c.satisfactory;
+        return bestResult.score / c.robotSeconds == c.satisfactory;
     }
 
     public void start() {

@@ -13,7 +13,7 @@ import java.util.Properties;
 public class Configuration {
     public int generations;
     public int robotsPerGeneration;
-    public int robotMilliseconds;
+    public int robotSeconds;
     public int parallelSimulations;
     public int windowWidth;
     public int windowHeight;
@@ -22,7 +22,6 @@ public class Configuration {
     public boolean GUI;
     public String save;
     public String load;
-    public int presentationChromosomes;
     public int pause;
     public float mutationChance;
     public double satisfactory;
@@ -38,8 +37,7 @@ public class Configuration {
     private void applyProperties(Properties p) {
         robotsPerGeneration = Integer.parseInt(p.getProperty(
                 "robotsPerGeneration", "100"));
-        robotMilliseconds = Integer.parseInt(p
-                .getProperty("robotSeconds", "20")) * 1000;
+        robotSeconds = Integer.parseInt(p.getProperty("robotSeconds", "20"));
         parallelSimulations = Integer.parseInt(p.getProperty(
                 "parallelSimulations", "7"));
         generations = Integer.parseInt(p.getProperty("generations", "-200"));
@@ -52,8 +50,6 @@ public class Configuration {
         GUI = Boolean.parseBoolean(p.getProperty("GUI", "true"));
         save = p.getProperty("save", "false");
         load = p.getProperty("load", "false");
-        presentationChromosomes = Integer.parseInt(p.getProperty(
-                "presentationChromosomes", "1"));
         pause = Integer.parseInt(p.getProperty("pause", "0"));
         mutationChance = Float.parseFloat(p.getProperty("mutationChance",
                 "0.01"));

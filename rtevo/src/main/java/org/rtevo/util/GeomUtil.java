@@ -8,5 +8,4 @@ public class GeomUtil {
     public static float circle(float percentage) {
         return (float) (percentage * 2 * Math.PI);
     }
-
 }

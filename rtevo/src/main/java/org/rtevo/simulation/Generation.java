@@ -42,8 +42,7 @@ public class Generation {
     // configuration cache
     private static float gravity;
     private static float timeStep;
-    private static int presentationChromosomesNumber;
-    private final static double random = 0.1;
+    private final static double random = 0.05;
 
     public static float getGravity() {
         return gravity;
@@ -61,14 +60,10 @@ public class Generation {
         Generation.timeStep = timeStep;
     }
 
-    public static void setPresentationChromosomesNumber(int n) {
-        presentationChromosomesNumber = n;
-    }
-
     /**
      * Generation from a list of chromosomes
      * 
-     * @param robotMilliseconds
+     * @param robotSeconds
      * @param chromosomes
      */
     public Generation(List<Chromosome> chromosomes,
@@ -81,7 +76,7 @@ public class Generation {
     /**
      * Random generation
      * 
-     * @param robotMilliseconds
+     * @param robotSeconds
      * @param numChromosomes
      */
     public Generation(int numChromosomes) {
@@ -179,23 +174,16 @@ public class Generation {
         return new Generation(chromosomes, myBestChromosome);
     }
 
-    /**
-     * Returns a random sample from the current generation.
-     * 
-     * @param robotMilliseconds
-     * @return
-     */
     public Simulation getSample() {
-        List<Chromosome> bestChromosomes = new ArrayList<Chromosome>();
+        List<Chromosome> presentationChromosomes = new ArrayList<Chromosome>();
 
-        for (int i = 0; i < presentationChromosomesNumber
-                && i < chromosomes.size(); ++i) {
-            // bestChromosomes.add(chromosomes.get(i));
-        }
+        // add previous best chromosome
+        presentationChromosomes.add(getPreviousBestChromosome());
+        // add random current chromosome
+        presentationChromosomes.add(chromosomes.get(RandUtil.random(0,
+                chromosomes.size())));
 
-        bestChromosomes.add(getPreviousBestChromosome());
-
-        return new Simulation(bestChromosomes, gravity, timeStep);
+        return new Simulation(presentationChromosomes, gravity, timeStep);
     }
 
     public Chromosome getPreviousBestChromosome() {

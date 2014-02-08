@@ -29,12 +29,12 @@ public class Robot {
     private float timer;
     private float restTimer;
 
-    private static long robotMilliseconds;
-    private static long restMilliseconds;
+    private static long robotSeconds;
+    private static long restSeconds;
 
-    public static void setRobotMilliseconds(long robotMilliseconds) {
-        Robot.robotMilliseconds = robotMilliseconds;
-        Robot.restMilliseconds = robotMilliseconds / 2;
+    public static void setRobotMilliseconds(long robotSeconds) {
+        Robot.robotSeconds = robotSeconds;
+        Robot.restSeconds = Math.min(10, robotSeconds / 2);
     }
 
     public Robot(Chromosome chromosome, World world) {
@@ -78,7 +78,7 @@ public class Robot {
         filter.groupIndex = -1;
         fd.filter = filter;
         fd.shape = Shape;
-        fd.density = 0.5f;
+        fd.density = 10f * (Math.min(part.width, part.height));
         fd.friction = 0.3f;
         fd.restitution = 0.5f;
 
@@ -98,18 +98,21 @@ public class Robot {
         jointDef.bodyA = bodyOne;
         jointDef.bodyB = bodyTwo;
 
-        jointDef.localAnchorA = partJoint.partOne
-                .getAnchor(partJoint.percentOne);
-        jointDef.localAnchorB = partJoint.partTwo
-                .getAnchor(partJoint.percentTwo);
+        jointDef.localAnchorA = partJoint.partOne.getAnchor(partJoint
+                .getPercentOne());
+        jointDef.localAnchorB = partJoint.partTwo.getAnchor(partJoint
+                .getPercentTwo());
 
-        // rotation
-        jointDef.lowerAngle = GeomUtil.circle(partJoint.rotateFrom);
-        jointDef.upperAngle = GeomUtil.circle(partJoint.rotateTo);
-        jointDef.enableLimit = true;
-        jointDef.maxMotorTorque = 10.0f;
-        jointDef.motorSpeed = GeomUtil.circle(partJoint.angularVelocity);
+        jointDef.lowerAngle = Math.min(partJoint.getPointA(),
+                partJoint.getPointB());
+        jointDef.upperAngle = Math.max(partJoint.getPointA(),
+                partJoint.getPointB());
+
+        jointDef.maxMotorTorque = 1000.0f;
+        jointDef.motorSpeed = GeomUtil.circle(partJoint.getAngularVelocity());
+
         jointDef.enableMotor = true;
+        jointDef.enableLimit = true;
 
         return world.createJoint(jointDef);
     }
@@ -133,7 +136,7 @@ public class Robot {
     public boolean isDone(float time) {
         timer += time;
 
-        if (timer * 1000 > robotMilliseconds) {
+        if (timer > robotSeconds) {
             return true;
         }
 
@@ -146,7 +149,7 @@ public class Robot {
             restTimer += time;
         }
 
-        if (restTimer * 1000 >= restMilliseconds) {
+        if (restTimer >= restSeconds) {
             return true;
         }
 
