@@ -4,46 +4,16 @@
 package org.rtevo.simulation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.rtevo.genetics.Chromosome;
-import org.rtevo.genetics.ChromosomeFactory;
+import org.rtevo.util.RandUtil;
 
-class OpJobThreadFactory implements ThreadFactory {
-    private int priority;
-    private boolean daemon;
-    private final String namePrefix;
-    private static final AtomicInteger poolNumber = new AtomicInteger(1);
-    private final AtomicInteger threadNumber = new AtomicInteger(1);
-
-    public OpJobThreadFactory(int priority) {
-        this(priority, false);
-    }
-
-    public OpJobThreadFactory(int priority, boolean daemon) {
-        this.priority = priority;
-        this.daemon = daemon;
-        namePrefix = "jobpool-" + poolNumber.getAndIncrement() + "-thread-";
-    }
-
-    public Thread newThread(Runnable r) {
-        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
-        t.setDaemon(daemon);
-        t.setPriority(priority);
-        return t;
-    }
-}
-
-/**
- * @author Jan Corazza
- * 
- */
 public class Generation {
     private static ThreadPoolExecutor workerPool;
     private static int parallelSimulations;
@@ -57,8 +27,8 @@ public class Generation {
                 parallelSimulations, 100L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>());
 
-        workerPool.setThreadFactory(new OpJobThreadFactory(Thread.MAX_PRIORITY,
-                false));
+        workerPool.setThreadFactory(new SimulationThreadFactory(
+                Thread.MAX_PRIORITY, false));
     }
 
     private int numSimulations;
@@ -66,10 +36,14 @@ public class Generation {
     private List<Result> results = new ArrayList<Result>();
     private List<Simulation> simulations;
     private List<Future<List<Result>>> futureSimulationResults = new ArrayList<Future<List<Result>>>();
+    private Chromosome previousBestChromosome;
+    private Chromosome myBestChromosome;
 
     // configuration cache
     private static float gravity;
     private static float timeStep;
+    private static int presentationChromosomesNumber;
+    private final static double random = 0.1;
 
     public static float getGravity() {
         return gravity;
@@ -87,14 +61,20 @@ public class Generation {
         Generation.timeStep = timeStep;
     }
 
+    public static void setPresentationChromosomesNumber(int n) {
+        presentationChromosomesNumber = n;
+    }
+
     /**
      * Generation from a list of chromosomes
      * 
      * @param robotMilliseconds
      * @param chromosomes
      */
-    public Generation(List<Chromosome> chromosomes) {
+    public Generation(List<Chromosome> chromosomes,
+            Chromosome bestPreviousChromosome) {
         this.chromosomes = chromosomes;
+        this.previousBestChromosome = bestPreviousChromosome;
         ++generationNumber;
     }
 
@@ -105,7 +85,7 @@ public class Generation {
      * @param numChromosomes
      */
     public Generation(int numChromosomes) {
-        this(ChromosomeFactory.random(numChromosomes));
+        this(Chromosome.random(numChromosomes), null);
     }
 
     /**
@@ -123,12 +103,7 @@ public class Generation {
         return true;
     }
 
-    /**
-     * Computes the evolution of this generation and returns it.
-     * 
-     * @return the next (evolved) generation
-     */
-    public Generation evolve() {
+    public ArrayList<Result> recordResults() {
         for (Future<List<Result>> futureSimulationResult : futureSimulationResults) {
             if (!futureSimulationResult.isDone()) {
                 throw new IllegalStateException(
@@ -148,7 +123,60 @@ public class Generation {
                     "Not all simulations have finished.");
         }
 
-        return new Generation(ChromosomeFactory.evolve(results));
+        Collections.sort(results);
+
+        myBestChromosome = new Chromosome(results.get(0).chromosome);
+
+        return new ArrayList<Result>(results);
+    }
+
+    private static void normalize(List<Result> results, float unit) {
+        for (Result result : results) {
+            result.normalized = result.score / unit;
+        }
+    }
+
+    private static float sum(List<Result> results) {
+        float sum = 0;
+
+        for (Result result : results) {
+            sum += result.score;
+        }
+
+        return sum;
+    }
+
+    /**
+     * Computes the evolution of this generation and returns it.
+     * 
+     * @return the next (evolved) generation
+     */
+    public Generation evolve() {
+        normalize(results, sum(results));
+
+        List<Chromosome> chromosomes = new ArrayList<Chromosome>();
+
+        int useRandom = (int) (random * results.size());
+
+        for (int i = 0; i < useRandom; ++i) {
+            chromosomes.add(Chromosome.random());
+        }
+
+        while (chromosomes.size() != results.size()) {
+            float sum = 0;
+            float r = RandUtil.random();
+
+            for (Result result : results) {
+                sum += result.normalized;
+
+                if (sum >= r) {
+                    chromosomes.add(result.chromosome.mutate());
+                    break;
+                }
+            }
+        }
+
+        return new Generation(chromosomes, myBestChromosome);
     }
 
     /**
@@ -159,13 +187,35 @@ public class Generation {
      */
     public Simulation getSample() {
         List<Chromosome> bestChromosomes = new ArrayList<Chromosome>();
-        bestChromosomes.add(chromosomes.get(0));
+
+        for (int i = 0; i < presentationChromosomesNumber
+                && i < chromosomes.size(); ++i) {
+            // bestChromosomes.add(chromosomes.get(i));
+        }
+
+        bestChromosomes.add(getPreviousBestChromosome());
 
         return new Simulation(bestChromosomes, gravity, timeStep);
     }
 
-    public Chromosome getBestChromosome() {
-        return chromosomes.get(0);
+    public Chromosome getPreviousBestChromosome() {
+        if (previousBestChromosome != null) {
+            return previousBestChromosome;
+        } else {
+            return chromosomes.get(0);
+        }
+    }
+
+    public Chromosome getMyBestChromosome() {
+        if (myBestChromosome != null) {
+            return myBestChromosome;
+        } else {
+            return getPreviousBestChromosome();
+        }
+    }
+
+    public Result getBestResult() {
+        return results.get(0);
     }
 
     /**

@@ -107,8 +107,7 @@ public class Robot {
         jointDef.lowerAngle = GeomUtil.circle(partJoint.rotateFrom);
         jointDef.upperAngle = GeomUtil.circle(partJoint.rotateTo);
         jointDef.enableLimit = true;
-        jointDef.maxMotorTorque = 10.0f; // TODO limit maximum torque for all
-                                         // joints
+        jointDef.maxMotorTorque = 10.0f;
         jointDef.motorSpeed = GeomUtil.circle(partJoint.angularVelocity);
         jointDef.enableMotor = true;
 
@@ -133,7 +132,7 @@ public class Robot {
 
     public boolean isDone(float time) {
         timer += time;
-        
+
         if (timer * 1000 > robotMilliseconds) {
             return true;
         }

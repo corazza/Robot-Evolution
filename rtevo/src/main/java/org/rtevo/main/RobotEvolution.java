@@ -8,11 +8,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.rtevo.common.Configuration;
 import org.rtevo.genetics.Chromosome;
+import org.rtevo.genetics.Part;
+import org.rtevo.genetics.PartJoint;
 import org.rtevo.gui.Window;
 import org.rtevo.simulation.Generation;
+import org.rtevo.simulation.Result;
 import org.rtevo.simulation.Robot;
 import org.rtevo.simulation.Simulation;
 
@@ -35,6 +39,10 @@ public class RobotEvolution {
     private Configuration c;
     private Gson gson = new Gson();
 
+    private int generations = 0;
+    private Result bestResult;
+    Simulation presentationSimulation;
+
     public RobotEvolution(Configuration config) {
         c = config;
 
@@ -46,14 +54,16 @@ public class RobotEvolution {
         Generation.configureWorkerPool(c.parallelSimulations);
         Generation.setGravity(c.gravity);
         Generation.setTimeStep(c.timeStep);
+        Generation.setPresentationChromosomesNumber(c.presentationChromosomes);
         Robot.setRobotMilliseconds(c.robotMilliseconds);
+        Chromosome.setMutationChance(c.mutationChance);
+
+        if (!c.load.equals("false")) {
+            c.GUI = true;
+        }
     }
 
     private void load() {
-        if (!c.save.equals("false")) {
-            System.out.println("saving will have no effect");
-        }
-
         int FPS = 60;
         float waitTime = 1000 / FPS;
         FileReader toLoad;
@@ -63,6 +73,22 @@ public class RobotEvolution {
 
             Chromosome loadedChromosome = gson.fromJson(toLoad,
                     Chromosome.class);
+
+            HashMap<Integer, Part> map = new HashMap<Integer, Part>();
+
+            for (PartJoint partJoint : loadedChromosome.partJoints) {
+                if (map.containsKey(partJoint.partOne.idm)) {
+                    partJoint.partOne = map.get(partJoint.partOne.idm);
+                } else {
+                    map.put(partJoint.partOne.idm, partJoint.partOne);
+                }
+
+                if (map.containsKey(partJoint.partTwo.idm)) {
+                    partJoint.partTwo = map.get(partJoint.partTwo.idm);
+                } else {
+                    map.put(partJoint.partTwo.idm, partJoint.partTwo);
+                }
+            }
 
             ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 
@@ -94,9 +120,18 @@ public class RobotEvolution {
 
     }
 
+    private boolean metCriteria() {
+        if (c.generations != -200) {
+            return generations == c.generations;
+        }
+
+        return bestResult.score / (c.robotMilliseconds * 1000) == c.satisfactory;
+    }
+
     public void start() {
         if (c.GUI) {
-            window = new Window(c.windowWidth, c.windowHeight);
+            window = new Window(c.windowWidth, c.windowHeight,
+                    c.load.equals("false") ? "simulation" : "presentation");
         }
 
         if (!c.load.equals("false")) {
@@ -108,7 +143,8 @@ public class RobotEvolution {
         Generation generation = new Generation(c.robotsPerGeneration);
 
         // Main algorithm
-        for (int i = 0; i < c.generations; ++i) {
+        do {
+            System.out.print("generation #" + (generations + 1) + "... ");
             // Create all the simulations and start them in their separate
             // threads
             long started = System.currentTimeMillis();
@@ -125,12 +161,12 @@ public class RobotEvolution {
                     }
                 }
             } else {
-                long wait = 0;
+                long wait = c.pause * 1000;
                 int FPS = 60;
                 float waitTime = 1000 / FPS;
 
                 // Create a simulation for a single chromosome
-                Simulation presentationSimulation = generation.getSample();
+                presentationSimulation = generation.getSample();
                 presentationSimulation.setExpire(false);
                 presentationSimulation.setTimeStep(0.01f);
                 presentationSimulation.setup();
@@ -153,22 +189,27 @@ public class RobotEvolution {
                 }
             }
 
+            generation.recordResults();
+
+            // Record end criteria
+            ++generations;
+            bestResult = generation.getBestResult();
+
             // Evolve
             generation = generation.evolve();
 
-            System.out.println("generation #" + (i + 1) + " done, took "
-                    + (System.currentTimeMillis() - started) + " milliseconds");
-        }
+            System.out.println("done, took "
+                    + (System.currentTimeMillis() - started) / 1000.0
+                    + " seconds, best result: " + bestResult);
+        } while (!metCriteria());
 
         if (!c.save.equals("false")) {
-            saveBest(generation.getBestChromosome());
+            saveBest(generation.getPreviousBestChromosome());
         }
 
         exit();
     }
 
-    // FIXME after a long simulation, some joints and parts had disconnected,
-    // resulting in several separate constructions
     public void saveBest(Chromosome best) {
         File directory = new File("chromosomes");
 

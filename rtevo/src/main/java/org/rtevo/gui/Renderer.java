@@ -40,6 +40,7 @@ class Renderer extends JPanel implements ActionListener {
     private Graphics2D currentGraphics;
     private Camera camera;
     private Body groundBody;
+    private String mode;
 
     private long startMillis;
 
@@ -58,8 +59,9 @@ class Renderer extends JPanel implements ActionListener {
     private static final Font robotFont = new Font(Font.SANS_SERIF, Font.PLAIN,
             12);
 
-    public Renderer(Window window) {
+    public Renderer(Window window, String mode) {
         this.window = window;
+        this.mode = mode;
         camera = new Camera(this);
 
         startMillis = System.currentTimeMillis();
@@ -210,30 +212,34 @@ class Renderer extends JPanel implements ActionListener {
         }
     }
 
-    private void drawInfo() {
+    private Vector<Integer> getGroundPosition() {
+        return camera.translate(groundBody.getPosition());
+    }
+
+    private void drawUpLeftInfo() {
         currentGraphics.setFont(infoFont);
-        currentGraphics.setColor(infoColor);
-        currentGraphics.setStroke(infoStroke);
 
-        Vector<Integer> groundPosition = camera.translate(groundBody
-                .getPosition());
-        Vector<Integer> origin = camera.translate(new Vec2(0, 0));
-
-        FontMetrics fontMetrics = currentGraphics.getFontMetrics();
         int infoOffset = 0;
+        FontMetrics fontMetrics = currentGraphics.getFontMetrics();
 
         float seconds = (System.currentTimeMillis() - startMillis) / 1000f;
 
         String timeString = "Time: " + String.format("%.1f", seconds) + "s";
-        String generationString = "Generation #" + Generation.generationNumber;
+        String generationString = mode == "simulation" ? "Generation #"
+                + Generation.generationNumber : "Presentation";
 
         currentGraphics.drawString(timeString, 10, fontMetrics.getHeight()
                 + infoOffset);
         currentGraphics.drawString(generationString, 10,
                 fontMetrics.getHeight() * 2 + infoOffset);
+    }
 
+    private void drawRobotInfo() {
         currentGraphics.setFont(robotFont);
-        fontMetrics = currentGraphics.getFontMetrics();
+        currentGraphics.setColor(infoColor);
+
+        FontMetrics fontMetrics = currentGraphics.getFontMetrics();
+        Vector<Integer> groundPosition = getGroundPosition();
 
         for (Robot robot : simulation.getRobots()) {
             Vector<Float> position = robot.getPosition();
@@ -250,12 +256,19 @@ class Renderer extends JPanel implements ActionListener {
                                     / 2, translated.y);
         }
 
-        currentGraphics.fillOval(origin.x - 2, origin.y - 2, 4, 4);
+    }
 
+    private void drawOrigin() {
+        Vector<Integer> origin = camera.translate(new Vec2(0, 0));
+        currentGraphics.fillOval(origin.x - 2, origin.y - 2, 4, 4);
+    }
+
+    private void drawLegendAndMeasures() {
+        Vector<Integer> groundPosition = getGroundPosition();
         Vector<Integer> from = camera.translate(new Vec2(2, 0));
         Vector<Integer> to = camera.translate(new Vec2(3, 0));
         int offset = 50;
-        int height = camera.translateRelative(10);
+        int height = camera.translateRelative(20);
 
         Line2D legend = new Line2D.Float(from.x, groundPosition.y + offset,
                 to.x, groundPosition.y + offset);
@@ -275,10 +288,21 @@ class Renderer extends JPanel implements ActionListener {
 
         currentGraphics.setColor(infoColor);
 
+        FontMetrics fontMetrics = currentGraphics.getFontMetrics();
+
         currentGraphics.drawString("1m",
                 (from.x + to.x) / 2 - fontMetrics.stringWidth("1m") / 2, from.y
                         + offset + fontMetrics.getHeight());
+    }
 
+    private void drawInfo() {
+        currentGraphics.setColor(infoColor);
+        currentGraphics.setStroke(infoStroke);
+
+        drawUpLeftInfo();
+        drawRobotInfo();
+        drawLegendAndMeasures();
+        drawOrigin();
     }
 
     @Override

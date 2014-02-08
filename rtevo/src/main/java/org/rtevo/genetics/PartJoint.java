@@ -3,6 +3,9 @@
  */
 package org.rtevo.genetics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.rtevo.util.RandUtil;
 
 /**
@@ -12,7 +15,7 @@ import org.rtevo.util.RandUtil;
 public class PartJoint {
     public static final float minAngularVelocity = -1f;
     public static final float maxAngularVelocity = 1f;
-    
+
     public float rotateFrom;
     public float rotateTo;
     public float angularVelocity;
@@ -33,8 +36,8 @@ public class PartJoint {
         percentOne = copy.percentOne;
         percentTwo = copy.percentTwo;
 
-        partOne = new Part(copy.partOne);
-        partTwo = new Part(copy.partTwo);
+        // partOne = new Part(copy.partOne);
+        // partTwo = new Part(copy.partTwo);
     }
 
     public PartJoint(Part partOne, Part partTwo) {
@@ -42,7 +45,14 @@ public class PartJoint {
         this.partTwo = partTwo;
     }
 
-    public static PartJoint random() {
+    public List<Part> getPartList() {
+        ArrayList<Part> partList = new ArrayList<Part>();
+        partList.add(partOne);
+        partList.add(partTwo);
+        return partList;
+    }
+
+    public static PartJoint random(Part one, Part two) {
         PartJoint partJoint = new PartJoint();
 
         partJoint.angularVelocity = RandUtil.random(0f, 1f);
@@ -57,6 +67,9 @@ public class PartJoint {
 
         partJoint.percentOne = RandUtil.random(0f, 1f);
         partJoint.percentTwo = RandUtil.random(0f, 1f);
+
+        partJoint.partOne = one;
+        partJoint.partTwo = two;
 
         return partJoint;
     }

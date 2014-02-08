@@ -11,15 +11,16 @@ import org.rtevo.genetics.Chromosome;
  */
 public class Result implements Comparable<Result> {
     public final Chromosome chromosome;
-    public final double metersPassed;
+    public float score;
+    public float normalized;
 
-    public Result(Chromosome chromosome, double metersPassed) {
+    public Result(Chromosome chromosome, float metersPassed) {
         this.chromosome = chromosome;
-        this.metersPassed = metersPassed;
+        this.score = metersPassed >= 0 ? metersPassed : 0;
     }
 
     public int compareTo(Result other) {
-        double difference = metersPassed - other.metersPassed;
+        double difference = score - other.score;
 
         if (difference < 0) {
             return 1;
@@ -32,7 +33,7 @@ public class Result implements Comparable<Result> {
 
     @Override
     public String toString() {
-        return metersPassed + "";
+        return score + "";
     }
 
 }

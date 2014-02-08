@@ -18,8 +18,11 @@ public class Part {
     public static final float minHeight = 0.5f;
     public static final float maxHeight = 2f;
 
+    private static int id = 10000;
+
     public float width;
     public float height;
+    public int idm = -1;
 
     // joints connected to this shape
     public ArrayList<PartJoint> partJoints = new ArrayList<PartJoint>();
@@ -28,7 +31,9 @@ public class Part {
      * Default constructor.
      */
     public Part() {
-
+        if (idm == -1) {
+            idm = id++;
+        }
     }
 
     /**
@@ -38,6 +43,7 @@ public class Part {
      *            - part to copy from
      */
     public Part(Part copy) {
+        this();
         width = copy.width;
         height = copy.height;
     }
@@ -82,7 +88,8 @@ public class Part {
 
     @Override
     public String toString() {
-        return "Shape [width=" + width + ", height=" + height + "]";
+        return "Part [width=" + width + ", height=" + height + ", idm=" + idm
+                + "]";
     }
 
 }
