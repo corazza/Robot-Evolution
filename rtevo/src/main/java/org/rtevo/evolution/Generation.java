@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.rtevo.simulation.Result;
 import org.rtevo.simulation.Simulation;
+import org.rtevo.simulation.SimulationThreadFactory;
 import org.rtevo.util.RandUtil;
 
 public class Generation {
@@ -43,7 +44,8 @@ public class Generation {
     // configuration cache
     private static float gravity;
     private static float timeStep;
-    private final static double random = 0;
+    private final static double random = 0.05;
+    private final static double best = 0.1;
 
     public static float getGravity() {
         return gravity;
@@ -152,7 +154,12 @@ public class Generation {
 
         List<Chromosome> chromosomes = new ArrayList<Chromosome>();
 
-        int useRandom = (int) (random * results.size());
+        int useBest = (int) (best * results.size());
+        int useRandom = Math.abs((int) (random * (results.size() - useBest)));
+
+        for (int i = 0; i < useBest; ++i) {
+            chromosomes.add(results.get(i).chromosome.mutate());
+        }
 
         for (int i = 0; i < useRandom; ++i) {
             chromosomes.add(Chromosome.random());

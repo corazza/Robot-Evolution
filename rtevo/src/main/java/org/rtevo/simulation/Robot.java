@@ -78,7 +78,7 @@ public class Robot {
         filter.groupIndex = -1;
         fd.filter = filter;
         fd.shape = Shape;
-        fd.density = 10f * (Math.min(part.width, part.height));
+        fd.density = 0.5f;
         fd.friction = 0.3f;
         fd.restitution = 0.5f;
 
@@ -108,7 +108,7 @@ public class Robot {
         jointDef.upperAngle = Math.max(partJoint.getPointA(),
                 partJoint.getPointB());
 
-        jointDef.maxMotorTorque = 1000.0f;
+        jointDef.maxMotorTorque = 100.0f;
         jointDef.motorSpeed = GeomUtil.circle(partJoint.getAngularVelocity());
 
         jointDef.enableMotor = true;
