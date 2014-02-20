@@ -9,7 +9,7 @@ import java.util.List;
 import org.rtevo.util.RandUtil;
 
 public class PartJoint {
-    public static final float maxAbsAngularVelocity = 1f;
+    public static final float maxAbsAngularVelocity = 0.5f;
 
     private float pointA;
     private float pointB;
@@ -150,7 +150,7 @@ public class PartJoint {
         } else if (percentTwo > 1) {
             percentTwo = 1;
         }
-
+//asdf limit number of parts in runtime
         this.percentTwo = percentTwo;
     }
 

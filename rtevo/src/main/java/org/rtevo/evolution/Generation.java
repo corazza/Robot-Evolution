@@ -182,6 +182,7 @@ public class Generation {
         return new Generation(chromosomes, myBestChromosome);
     }
 
+    //asd returns either best or random, usually returns two same robots! something is wrong with selection
     public Simulation getSample() {
         List<Chromosome> presentationChromosomes = new ArrayList<Chromosome>();
 

@@ -38,7 +38,7 @@ public class Robot {
     }
 
     public Robot(Chromosome chromosome, World world) {
-        // TODO correctly position the parts and angles
+        // asdf correctly position the parts and angles
         this.world = world;
         this.chromosome = chromosome;
 
@@ -85,7 +85,11 @@ public class Robot {
         // create the body and add fixture to it
         Body body = world.createBody(bd);
         body.createFixture(fd);
-        body.setUserData(new PartUserData());
+        
+        PartUserData userData = new PartUserData();
+        userData.chromosome = chromosome;
+        
+        body.setUserData(userData);
 
         return body;
     }

@@ -19,6 +19,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JPanel;
 
@@ -28,10 +30,12 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.rtevo.common.Vector;
+import org.rtevo.evolution.Chromosome;
 import org.rtevo.evolution.Generation;
 import org.rtevo.simulation.PartUserData;
 import org.rtevo.simulation.Robot;
 import org.rtevo.simulation.Simulation;
+import org.rtevo.simulation.UserData;
 
 @SuppressWarnings("serial")
 class Renderer extends JPanel implements ActionListener {
@@ -44,9 +48,23 @@ class Renderer extends JPanel implements ActionListener {
 
     private long startMillis;
 
+    private int robotIx;
+
     // rendering
-    private static final Color partFillColor = new Color(200, 200, 205, 100);
-    private static final Color partOutlineColor = new Color(200, 220, 200, 200);
+    private Color partFillColor;
+    private Color partOutlineColor;
+
+    private static ArrayList<Color> partFillColors = new ArrayList<Color>();
+    private static ArrayList<Color> partOutlineColors = new ArrayList<Color>();
+
+    static {
+        partOutlineColors.add(new Color(200, 220, 200, 200));
+        partOutlineColors.add(new Color(220, 200, 200, 200));
+
+        partFillColors.add(new Color(200, 205, 205, 100));
+        partFillColors.add(new Color(205, 200, 205, 100));
+    }
+
     private static final Color groundColor = new Color(10, 210, 50, 70); // green
     private static final Color backgroundColor = new Color(50, 50, 50);
     private static final BasicStroke partOutlineStroke = new BasicStroke(1f);
@@ -71,6 +89,9 @@ class Renderer extends JPanel implements ActionListener {
         addMouseWheelListener(new RendererMouseWheelListener());
 
         setFocusable(true);
+
+        partFillColor = partFillColors.get(robotIx);
+        partOutlineColor = partOutlineColors.get(robotIx);
 
         initUI();
     }
@@ -200,10 +221,36 @@ class Renderer extends JPanel implements ActionListener {
         if (simulation == null) {
             return;
         }
+        
+        robotIx = 0;
+
+        HashMap<Chromosome, Color> colorMapFill = new HashMap<Chromosome, Color>();
+        HashMap<Chromosome, Color> colorMapOutline = new HashMap<Chromosome, Color>();
 
         for (Body body = simulation.getWorld().getBodyList(); body != null; body = body
                 .getNext()) {
-            if (body.getUserData() instanceof PartUserData) {
+            UserData userData = (UserData) body.getUserData();
+
+            if (userData instanceof PartUserData) {
+                PartUserData partUserData = (PartUserData) userData;
+
+                if (colorMapFill.containsKey(partUserData.chromosome)) {
+                    partFillColor = colorMapFill.get(partUserData.chromosome);
+                    partOutlineColor = colorMapOutline
+                            .get(partUserData.chromosome);
+                } else {
+                    partFillColor = partFillColors.get(robotIx);
+                    partOutlineColor = partOutlineColors.get(robotIx);
+
+                    colorMapFill.put(partUserData.chromosome, partFillColor);
+                    colorMapOutline.put(partUserData.chromosome,
+                            partOutlineColor);
+
+                    if (++robotIx >= partFillColors.size()) {
+                        robotIx = 0;
+                    }
+                }
+
                 drawPart(body);
             } else {
                 drawGround(body);

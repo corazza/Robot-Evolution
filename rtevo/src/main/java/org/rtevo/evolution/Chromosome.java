@@ -156,7 +156,7 @@ public class Chromosome {
         partJoints.remove(toRemove.partJoints.get(0));
     }
 
-    // TODO start with premade structure
+    // asdf start with premade structure
     public static Chromosome random() {
         Chromosome chromosome = new Chromosome();
 
