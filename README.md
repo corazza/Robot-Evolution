@@ -21,15 +21,13 @@ It also runs on servers:
 
 #Usage
 
-You just need to compile the program into a JAR with all the dependencies and run it (it will use the [default configuration](https://github.com/yannbane/rtevo/blob/master/rtevo/src/main/resources/default-configuration.properties)):
+You can download the program [here](https://drive.google.com/file/d/0B3IY1AV4ocikeE55UmVUclBhNkE/edit?usp=sharing). It is a 7-zipped file containing the JAR (with all the dependencies baked in) and a configuration file.
 
-`java -jar rtevo.jar`
-
-An alternative configuration file can be specified on the command line:
+Run the program like this:
 
 `java -jar rtevo.jar configuration.properties`
 
-...where configuration.properties could be the edited default configuration file supplied earlier (which is also available when the JAR file is extracted).
+You can edit the configuration file to suit your needs.
 
 ##Croatian
 
