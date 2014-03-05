@@ -7,6 +7,8 @@ Example:
 
 ![Example robot](http://i1.wp.com/yannbane.com/wordpress/wp-content/uploads/2014/03/walker1.png?resize=210%2C199)
 
+I have a blog post explaining most of the application: http://yannbane.com/2014/03/robot-evolution/.
+
 We use Java and technologies such as JBox2D, Java Concurrent and Swing in order to create an application that will enable users to witness the ongoing evolution process, while much of the work is being done in the backgruond.
 
 The program that we have developed is an interesting example of software inspiried by biological phenomena, and has many useful applications.
