@@ -1,7 +1,7 @@
-rtevo
-=====
+Robot Evolution
+===============
 
-Robot Evolution is an application that uses genetic algorithms to evolve and optimize virtual walking poly-pedal robots. The robots are 2D geometric constructions of rectangles that are connected by virtual motors which apply torque to these rectangles, making them move.
+Robot Evolution (rtevo) is an application that uses genetic algorithms to evolve and optimize virtual walking poly-pedal robots. The robots are 2D geometric constructions of rectangles that are connected by virtual motors which apply torque to these rectangles, making them move.
 
 Example:
 
