@@ -9,7 +9,7 @@ import java.util.List;
 import org.rtevo.util.RandUtil;
 
 public class PartJoint {
-    public static final float maxAbsAngularVelocity = 0.5f;
+    public static final float maxAbsAngularVelocity = 0.2f;
 
     private float pointA;
     private float pointB;

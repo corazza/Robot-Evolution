@@ -88,15 +88,21 @@ public class RobotEvolution {
 
             // Create a simulation for a single chromosome
             Simulation presentationSimulation = new Simulation(chromosomes,
-                    c.gravity, waitTime / 1000);
+                    c.gravity, 0.001f);
+
+            presentationSimulation.setTimeStep(0.01f);
+//            presentationSimulation.setTimeStep(0.001f);
+            
             presentationSimulation.setExpire(false);
             presentationSimulation.setup();
 
             // Submit it to the renderer
             window.setSimulation(presentationSimulation);
+            Robot presentedRobot = presentationSimulation.getRobots().get(0);
 
             while (true) {
                 presentationSimulation.update();
+                presentedRobot.isBird();
                 window.updateDisplay();
 
                 try {
@@ -160,7 +166,7 @@ public class RobotEvolution {
                 // Create a simulation for a single chromosome
                 presentationSimulation = generation.getSample();
                 presentationSimulation.setExpire(false);
-                presentationSimulation.setTimeStep(0.01f);
+                presentationSimulation.setTimeStep(waitTime / 1000);
                 presentationSimulation.setup();
 
                 // Submit it to the renderer

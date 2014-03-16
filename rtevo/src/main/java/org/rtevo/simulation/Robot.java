@@ -85,11 +85,13 @@ public class Robot {
         // create the body and add fixture to it
         Body body = world.createBody(bd);
         body.createFixture(fd);
-        
+
         PartUserData userData = new PartUserData();
         userData.chromosome = chromosome;
-        
+
         body.setUserData(userData);
+
+//        body.m_angularDamping = 0.05f;
 
         return body;
     }
@@ -112,7 +114,7 @@ public class Robot {
         jointDef.upperAngle = Math.max(partJoint.getPointA(),
                 partJoint.getPointB());
 
-        jointDef.maxMotorTorque = 100.0f;
+        jointDef.maxMotorTorque = 70.0f;
         jointDef.motorSpeed = GeomUtil.circle(partJoint.getAngularVelocity());
 
         jointDef.enableMotor = true;
@@ -176,6 +178,33 @@ public class Robot {
         position.y /= bodies.size();
 
         return position;
+    }
+
+    public boolean isBird() {
+        for (Body body : bodies) {
+            if (Math.abs(body.getAngle()) > GeomUtil.circle(2) || Math.abs(body.m_angularVelocity) > GeomUtil.circle(PartJoint.maxAbsAngularVelocity)*2) {
+                System.out.println("removing bird " + Math.abs(body.getAngle()) + ", " + Math.abs(body.m_angularVelocity) + " > " + GeomUtil.circle(PartJoint.maxAbsAngularVelocity)*2);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public ArrayList<Body> getBodies() {
+        return bodies;
+    }
+
+    public void setBodies(ArrayList<Body> bodies) {
+        this.bodies = bodies;
+    }
+
+    public ArrayList<Joint> getJoints() {
+        return joints;
+    }
+
+    public void setJoints(ArrayList<Joint> joints) {
+        this.joints = joints;
     }
 
 }

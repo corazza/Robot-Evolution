@@ -121,7 +121,7 @@ public class Simulation implements Callable<List<Result>> {
                 .getNext()) {
             if (joint.getJointAngle() <= joint.getLowerLimit()
                     || joint.getJointAngle() >= joint.getUpperLimit()) {
-                joint.setMotorSpeed(-joint.getMotorSpeed());
+                joint.setMotorSpeed((float) (-joint.getMotorSpeed()));
             }
         }
     }
@@ -138,7 +138,7 @@ public class Simulation implements Callable<List<Result>> {
         ArrayList<Chromosome> chromosomesToRemove = new ArrayList<Chromosome>();
 
         for (Robot robot : robots) {
-            if (robot.isDone(timeStep)) {
+            if (robot.isDone(timeStep) || robot.isBird()) {
                 results.add(robot.removeFromWorld());
                 robotsToRemove.add(robot);
                 chromosomesToRemove.add(robot.getChromosome());

@@ -12,7 +12,7 @@ import org.rtevo.util.RandUtil;
 
 public class Chromosome {
     private static final int minShapes = 2;
-    private static final int maxParts = 20;
+    private static final int maxShapes = 10;
     private static float mutationChance = 0.2f;
 
     public static void setMutationChance(float mutationChance) {
@@ -122,7 +122,7 @@ public class Chromosome {
         }
 
         if (mutationChance / 10 > RandUtil.random(0f, 1f)
-                && partList.size() < Chromosome.maxParts) {
+                && partList.size() < Chromosome.maxShapes) {
             mutated.addRandomPart();
         }
 
@@ -166,7 +166,7 @@ public class Chromosome {
         PartJoint initialPartJoint = PartJoint.random(partOne, partTwo);
         chromosome.partJoints.add(initialPartJoint);
 
-        for (int i = 0; i < RandUtil.random(minShapes, maxParts - 2); ++i) {
+        for (int i = 0; i < RandUtil.random(minShapes, maxShapes - 2); ++i) {
             chromosome.addRandomPart();
         }
 
