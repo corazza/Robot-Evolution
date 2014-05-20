@@ -17,7 +17,7 @@ The user interface looks like this:
 
 ![User interface](http://i0.wp.com/yannbane.com/wordpress/wp-content/uploads/2014/03/ui.png?resize=604%2C313)
 
-It also runs on servers:
+It also runs on headless servers (Linux in this case):
 
 ![rtevo.jar threads on a Linux server](http://i1.wp.com/yannbane.com/wordpress/wp-content/uploads/2014/03/onServer.png?resize=604%2C394)
 
