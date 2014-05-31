@@ -1,13 +1,13 @@
 Robot Evolution
 ===============
 
-Robot Evolution (rtevo) is an application that uses genetic algorithms to evolve and optimize virtual walking poly-pedal robots. The robots are 2D geometric constructions of rectangles that are connected by virtual motors which apply torque to these rectangles, making them move.
+Robot Evolution is an application that uses genetic algorithms to evolve and optimize virtual walking poly-pedal robots. The robots are 2D geometric constructions of rectangles that are connected by virtual motors which apply torque to these rectangles, making them move.
 
 Example:
 
 ![Example robot](http://i1.wp.com/yannbane.com/wordpress/wp-content/uploads/2014/03/walker1.png?resize=210%2C199)
 
-I have a blog post explaining most of the application: http://yannbane.com/2014/03/robot-evolution/.
+I have a blog post explaining most of the application: [jancorazza.com/2014/03/robot-evolution](http://jancorazza.com/2014/03/robot-evolution/).
 
 We use Java and technologies such as JBox2D, Java Concurrent and Swing in order to create an application that will enable users to witness the ongoing evolution process, while much of the work is being done in the backgruond.
 
