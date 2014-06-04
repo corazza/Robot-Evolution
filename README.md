@@ -31,7 +31,7 @@ It also runs on headless servers (Linux in this case):
 
 Run the program like this:
 
-`java -jar rtevo.jar configuration.properties`
+    java -jar rtevo.jar configuration.properties
 
 You can edit the configuration file to suit your needs.
 
