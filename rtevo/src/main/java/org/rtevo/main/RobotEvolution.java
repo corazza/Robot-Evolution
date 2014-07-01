@@ -27,208 +27,211 @@ import com.google.gson.Gson;
  * 
  */
 public class RobotEvolution {
-    private Window window;
+	private Window window;
 
-    private Configuration c;
-    private Gson gson = new Gson();
+	private Configuration c;
+	private Gson gson = new Gson();
 
-    private int generations = 0;
-    private Result bestResult;
-    Simulation presentationSimulation;
+	private int generations = 0;
+	private Result bestResult;
+	Simulation presentationSimulation;
 
-    public RobotEvolution(Configuration config) {
-        c = config;
+	public RobotEvolution(Configuration config) {
+		c = config;
 
-        if (c.parallelSimulations < 1) {
-            throw new IllegalArgumentException(
-                    "The number of parallel simulations must be greater than 0");
-        }
+		if (c.parallelSimulations < 1) {
+			throw new IllegalArgumentException(
+					"The number of parallel simulations must be greater than 0");
+		}
 
-        Generation.configureWorkerPool(c.parallelSimulations);
-        Generation.setGravity(c.gravity);
-        Generation.setTimeStep(c.timeStep);
-        Robot.setRobotMilliseconds(c.robotSeconds);
-        Chromosome.setMutationChance(c.mutationChance);
+		Generation.configureWorkerPool(c.parallelSimulations);
+		Generation.setGravity(c.gravity);
+		Generation.setTimeStep(c.timeStep);
+		Robot.setRobotMilliseconds(c.robotSeconds);
+		Chromosome.setMutationChance(c.mutationChance);
 
-        if (!c.load.equals("false")) {
-            c.GUI = true;
-        }
-    }
+		if (!c.load.equals("false")) {
+			c.GUI = true;
+		}
+	}
 
-    private void load() {
-        int FPS = 60;
-        float waitTime = 1000 / FPS;
-        FileReader toLoad;
+	private void load() {
+		int FPS = 60;
+		float waitTime = 1000 / FPS;
+		FileReader toLoad;
 
-        try {
-            toLoad = new FileReader(new File("chromosomes/" + c.load));
+		try {
+			toLoad = new FileReader(new File("chromosomes/" + c.load));
 
-            Chromosome loadedChromosome = gson.fromJson(toLoad,
-                    Chromosome.class);
+			Chromosome loadedChromosome = gson.fromJson(toLoad,
+					Chromosome.class);
 
-            HashMap<Integer, Part> map = new HashMap<Integer, Part>();
+			HashMap<Integer, Part> map = new HashMap<Integer, Part>();
 
-            for (PartJoint partJoint : loadedChromosome.partJoints) {
-                if (map.containsKey(partJoint.partOne.idm)) {
-                    partJoint.partOne = map.get(partJoint.partOne.idm);
-                } else {
-                    map.put(partJoint.partOne.idm, partJoint.partOne);
-                }
+			for (PartJoint partJoint : loadedChromosome.partJoints) {
+				if (map.containsKey(partJoint.partOne.idm)) {
+					partJoint.partOne = map.get(partJoint.partOne.idm);
+				} else {
+					map.put(partJoint.partOne.idm, partJoint.partOne);
+				}
 
-                if (map.containsKey(partJoint.partTwo.idm)) {
-                    partJoint.partTwo = map.get(partJoint.partTwo.idm);
-                } else {
-                    map.put(partJoint.partTwo.idm, partJoint.partTwo);
-                }
-            }
+				if (map.containsKey(partJoint.partTwo.idm)) {
+					partJoint.partTwo = map.get(partJoint.partTwo.idm);
+				} else {
+					map.put(partJoint.partTwo.idm, partJoint.partTwo);
+				}
+			}
 
-            ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
+			ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 
-            chromosomes.add(loadedChromosome);
+			chromosomes.add(loadedChromosome);
 
-            // Create a simulation for a single chromosome
-            Simulation presentationSimulation = new Simulation(chromosomes,
-                    c.gravity, 0.001f);
+			// Create a simulation for a single chromosome
+			Simulation presentationSimulation = new Simulation(chromosomes,
+					c.gravity, 0.001f);
 
-            presentationSimulation.setTimeStep(0.01f);
-//            presentationSimulation.setTimeStep(0.001f);
-            
-            presentationSimulation.setExpire(false);
-            presentationSimulation.setup();
+			presentationSimulation.setTimeStep(0.01f);
+			// presentationSimulation.setTimeStep(0.001f);
 
-            // Submit it to the renderer
-            window.setSimulation(presentationSimulation);
-            Robot presentedRobot = presentationSimulation.getRobots().get(0);
+			presentationSimulation.setExpire(false);
+			presentationSimulation.setup();
 
-            while (true) {
-                presentationSimulation.update();
-                presentedRobot.isBird();
-                window.updateDisplay();
+			// Submit it to the renderer
+			window.setSimulation(presentationSimulation);
+			Robot presentedRobot = presentationSimulation.getRobots().get(0);
 
-                try {
-                    Thread.sleep((int) waitTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+			while (true) {
+				presentationSimulation.update();
+				presentedRobot.isBird();
+				window.updateDisplay();
 
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        }
+				try {
+					Thread.sleep((int) waitTime);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 
-    }
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
 
-    private boolean metCriteria() {
-        if (c.generations != -200) {
-            return generations == c.generations;
-        }
+	}
 
-        return bestResult.score / c.robotSeconds == c.satisfactory;
-    }
+	private boolean metCriteria() {
+		if (c.generations != -200) {
+			return generations == c.generations;
+		}
 
-    public void start() {
-        if (c.GUI) {
-            window = new Window(c.windowWidth, c.windowHeight,
-                    c.load.equals("false") ? "simulation" : "presentation");
-        }
+		return bestResult.score / c.robotSeconds == c.satisfactory;
+	}
 
-        if (!c.load.equals("false")) {
-            load();
-            exit();
-        }
+	private Generation performGa() {
+		// Initialize GA:
+		Generation generation = new Generation(c.robotsPerGeneration);
 
-        // Initialize GA:
-        Generation generation = new Generation(c.robotsPerGeneration);
+		// Main algorithm
+		do {
+			System.out.print("generation #" + (generations + 1) + "... ");
+			// Create all the simulations and start them in their separate
+			// threads
+			long started = System.currentTimeMillis();
+			generation.computeAll();
 
-        // Main algorithm
-        do {
-            System.out.print("generation #" + (generations + 1) + "... ");
-            // Create all the simulations and start them in their separate
-            // threads
-            long started = System.currentTimeMillis();
-            generation.computeAll();
+			if (!c.GUI) {
+				int waitMillis = 100;
 
-            if (!c.GUI) {
-                int waitMillis = 100;
+				while (!generation.isDone()) {
+					try {
+						Thread.sleep(waitMillis);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				long wait = c.pause * 1000;
+				int FPS = 60;
+				float waitTime = 1000 / FPS;
 
-                while (!generation.isDone()) {
-                    try {
-                        Thread.sleep(waitMillis);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {
-                long wait = c.pause * 1000;
-                int FPS = 60;
-                float waitTime = 1000 / FPS;
+				// Create a simulation for a single chromosome
+				presentationSimulation = generation.getSample();
+				presentationSimulation.setExpire(false);
+				presentationSimulation.setTimeStep(waitTime / 1000);
+				presentationSimulation.setup();
 
-                // Create a simulation for a single chromosome
-                presentationSimulation = generation.getSample();
-                presentationSimulation.setExpire(false);
-                presentationSimulation.setTimeStep(waitTime / 1000);
-                presentationSimulation.setup();
+				// Submit it to the renderer
+				window.setSimulation(presentationSimulation);
 
-                // Submit it to the renderer
-                window.setSimulation(presentationSimulation);
+				// Simulate and render the presentation simulation while real
+				// computation is being done in the backend
+				while (!generation.isDone()
+						|| started + wait > System.currentTimeMillis()) {
+					presentationSimulation.update();
+					window.updateDisplay();
 
-                // Simulate and render the presentation simulation while real
-                // computation is being done in the backend
-                while (!generation.isDone()
-                        || started + wait > System.currentTimeMillis()) {
-                    presentationSimulation.update();
-                    window.updateDisplay();
+					try {
+						Thread.sleep((int) waitTime);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 
-                    try {
-                        Thread.sleep((int) waitTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+			generation.recordResults();
 
-            generation.recordResults();
+			// Record end criteria
+			++generations;
+			bestResult = generation.getBestResult();
 
-            // Record end criteria
-            ++generations;
-            bestResult = generation.getBestResult();
+			// Evolve
+			generation = generation.evolve();
 
-            // Evolve
-            generation = generation.evolve();
+			System.out.println("generation done, took "
+					+ (System.currentTimeMillis() - started) / 1000.0
+					+ " seconds, best result: " + bestResult);
+		} while (!metCriteria());
 
-            System.out.println("done, took "
-                    + (System.currentTimeMillis() - started) / 1000.0
-                    + " seconds, best result: " + bestResult);
-        } while (!metCriteria());
+		return generation;
+	}
 
-        if (!c.save.equals("false")) {
-            saveBest(generation.getPreviousBestChromosome());
-        }
+	private void checkLoad() {
+		if (!c.load.equals("false")) {
+			load();
+			return;
+		}
+	}
 
-        exit();
-    }
+	private void checkGui() {
+		if (c.GUI) {
+			window = new Window(c.windowWidth, c.windowHeight,
+					c.load.equals("false") ? "simulation" : "presentation");
+		}
+	}
 
-    public void saveBest(Chromosome best) {
-        File directory = new File("chromosomes");
+	public void start() {
+		checkGui();
+		checkLoad();
+		Generation lastGeneration = performGa();
+		if (!c.save.equals("false")) {
+			saveBest(lastGeneration.getPreviousBestChromosome());
+		}
+	}
 
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
+	public void saveBest(Chromosome best) {
+		File directory = new File("chromosomes");
 
-        File saveFile = new File("chromosomes/" + c.save);
+		if (!directory.exists()) {
+			directory.mkdir();
+		}
 
-        try {
-            PrintWriter writer = new PrintWriter(saveFile);
-            writer.print(gson.toJson(best));
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
+		File saveFile = new File("chromosomes/" + c.save);
 
-    public void exit() {
-        System.out.println("Program done.");
-        System.exit(0);
-    }
-
+		try {
+			PrintWriter writer = new PrintWriter(saveFile);
+			writer.print(gson.toJson(best));
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 }

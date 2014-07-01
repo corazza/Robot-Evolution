@@ -183,7 +183,6 @@ public class Robot {
     public boolean isBird() {
         for (Body body : bodies) {
             if (Math.abs(body.getAngle()) > GeomUtil.circle(2) || Math.abs(body.m_angularVelocity) > GeomUtil.circle(PartJoint.maxAbsAngularVelocity)*2) {
-                System.out.println("removing bird " + Math.abs(body.getAngle()) + ", " + Math.abs(body.m_angularVelocity) + " > " + GeomUtil.circle(PartJoint.maxAbsAngularVelocity)*2);
                 return true;
             }
         }
